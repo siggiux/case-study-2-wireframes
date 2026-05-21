@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
+  <meta name="theme-color" content="#0F0F0F" />
+  <title>Relay — Handover (empty)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <a class="state-switch" href="index.html">View populated state →</a>
+
+  <div class="device" id="device">
+    <main class="scroll">
+      <header class="header">
+        <h1>Your handover</h1>
+        <button class="btn-finish pulse" type="button">Finish handover</button>
+      </header>
+
+      <section class="section">
+        <div class="section-head">
+          <h2>Tasks</h2>
+          <span class="section-meta">0 unfinished tasks</span>
+        </div>
+        <p class="empty">No tasks added yet</p>
+        <button class="btn-add" data-open-sheet="task">Add task</button>
+      </section>
+
+      <section class="section">
+        <div class="section-head">
+          <h2>Notes</h2>
+          <span class="section-meta">0 notes</span>
+        </div>
+        <p class="empty">No notes added yet</p>
+        <button class="btn-add" data-open-sheet="note">Add note</button>
+      </section>
+
+      <section class="section">
+        <div class="section-head">
+          <h2>Reports</h2>
+          <span class="section-meta">0 reports</span>
+        </div>
+        <p class="empty">No report added yet</p>
+        <p class="hint">Most shifts have something worth flagging. It all helps.</p>
+        <button class="btn-add" data-open-sheet="report">Add report</button>
+      </section>
+    </main>
+
+    <nav class="tabbar">
+      <button class="tab active" aria-label="Handover">
+        <i data-lucide="clipboard-list"></i>
+        <span>Handover</span>
+      </button>
+      <button class="tab" aria-label="History">
+        <i data-lucide="history"></i>
+        <span>History</span>
+      </button>
+      <button class="tab-fab" aria-label="Add" data-open-sheet="task">
+        <i data-lucide="plus"></i>
+      </button>
+      <button class="tab" aria-label="Team">
+        <i data-lucide="users"></i>
+        <span>Team</span>
+      </button>
+      <button class="tab" aria-label="Profile">
+        <i data-lucide="user"></i>
+        <span>Profile</span>
+      </button>
+    </nav>
+
+    <div class="sheet-overlay" id="sheet-overlay"></div>
+    <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title">
+      <div class="sheet-handle" id="sheet-handle"></div>
+
+      <div class="sheet-tabs" id="sheet-tabs">
+        <button class="sheet-tab active" data-sheet-tab="task" id="sheet-title">Add task</button>
+        <button class="sheet-tab" data-sheet-tab="note">Add note</button>
+        <button class="sheet-tab" data-sheet-tab="report">Add report</button>
+      </div>
+
+      <div class="sheet-body" data-sheet-panel="task">
+        <input class="search" type="search" placeholder="Search tasks…" id="task-search" />
+
+        <div class="sheet-section-title">Common</div>
+        <ul id="common-list">
+          <li class="pick-row" data-pick="Clean: Espresso machine">
+            <span class="radio"></span>
+            <span class="label">Clean: Espresso machine</span>
+          </li>
+          <li class="pick-row" data-pick="Stock: Oat milk">
+            <span class="radio"></span>
+            <span class="label">Stock: Oat milk</span>
+          </li>
+          <li class="pick-row" data-pick="Stock: Napkins">
+            <span class="radio"></span>
+            <span class="label">Stock: Napkins</span>
+          </li>
+          <li class="pick-row" data-pick="Clean: Syrup bottles">
+            <span class="radio"></span>
+            <span class="label">Clean: Syrup bottles</span>
+          </li>
+        </ul>
+
+        <div class="chips" id="category-chips">
+          <button class="chip" data-cat="other">Other</button>
+          <button class="chip" data-cat="cleaning">Cleaning</button>
+          <button class="chip" data-cat="stock">Stock</button>
+          <button class="chip" data-cat="equipment">Equipment</button>
+          <button class="chip" data-cat="prep">Prep</button>
+        </div>
+
+        <ul class="pick-list hidden" data-cat-list="cleaning">
+          <li class="pick-row" data-pick="Clean: Steam wand"><span class="radio"></span><span class="label">Steam wand</span></li>
+          <li class="pick-row" data-pick="Clean: Grinder hopper"><span class="radio"></span><span class="label">Grinder hopper</span></li>
+          <li class="pick-row" data-pick="Clean: Drip tray"><span class="radio"></span><span class="label">Drip tray</span></li>
+          <li class="pick-row" data-pick="Clean: Fridge shelves"><span class="radio"></span><span class="label">Fridge shelves</span></li>
+        </ul>
+        <ul class="pick-list hidden" data-cat-list="stock">
+          <li class="pick-row" data-pick="Stock: Coffee beans"><span class="radio"></span><span class="label">Coffee beans</span></li>
+          <li class="pick-row" data-pick="Stock: Cups, large"><span class="radio"></span><span class="label">Cups, large</span></li>
+          <li class="pick-row" data-pick="Stock: Sugar sachets"><span class="radio"></span><span class="label">Sugar sachets</span></li>
+          <li class="pick-row" data-pick="Stock: Pastry case"><span class="radio"></span><span class="label">Pastry case</span></li>
+        </ul>
+        <ul class="pick-list hidden" data-cat-list="equipment">
+          <li class="pick-row" data-pick="Equipment: Descale machine"><span class="radio"></span><span class="label">Descale machine</span></li>
+          <li class="pick-row" data-pick="Equipment: Replace filter"><span class="radio"></span><span class="label">Replace filter</span></li>
+          <li class="pick-row" data-pick="Equipment: Calibrate grinder"><span class="radio"></span><span class="label">Calibrate grinder</span></li>
+        </ul>
+        <ul class="pick-list hidden" data-cat-list="prep">
+          <li class="pick-row" data-pick="Prep: Cut pastries"><span class="radio"></span><span class="label">Cut pastries</span></li>
+          <li class="pick-row" data-pick="Prep: Refill syrups"><span class="radio"></span><span class="label">Refill syrups</span></li>
+          <li class="pick-row" data-pick="Prep: Brew filter batch"><span class="radio"></span><span class="label">Brew filter batch</span></li>
+        </ul>
+
+        <div class="hidden" data-cat-list="other">
+          <p class="field-hint">Add a one-off task for today's handover only</p>
+          <div class="field">
+            <label for="other-title">Title <span style="color:#D33">*</span></label>
+            <input type="text" id="other-title" placeholder="e.g. Reorder loyalty cards" />
+          </div>
+          <div class="field">
+            <label for="other-details">Details</label>
+            <textarea id="other-details" placeholder="Any context the next shift needs"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="sheet-body hidden" data-sheet-panel="note">
+        <div class="field">
+          <label for="note-text">Note for the next shift</label>
+          <textarea id="note-text" placeholder="Anything the next person should know…"></textarea>
+        </div>
+      </div>
+
+      <div class="sheet-body hidden" data-sheet-panel="report">
+        <div class="field">
+          <label for="report-text">What happened?</label>
+          <textarea id="report-text" placeholder="Describe what came up during your shift"></textarea>
+        </div>
+      </div>
+
+      <div class="sheet-foot">
+        <button class="btn-primary" id="sheet-submit" disabled>
+          <span id="sheet-submit-label">Add to handover</span>
+          <span class="badge hidden" id="sheet-badge">0</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="app.js"></script>
+</body>
+</html>

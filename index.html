@@ -1,0 +1,1539 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
+  <meta name="theme-color" content="#0F0F0F" />
+  <title>Relay — Handover</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0F0F0F;
+      --card: #1A1A1A;
+      --surface: #242424;
+      --ink: #F0F0F0;
+      --ink-2: #888888;
+      --ink-3: #555555;
+      --line: #2E2E2E;
+      --accent: #1A87F1;
+      --btn-secondary: #2E2E2E;
+      --handle: #3A3A3A;
+      --hint: #666666;
+      --strike: #555555;
+      --avatar-bg: #2A2A4A;
+      --avatar-ink: #A0A0FF;
+      --overlay: rgba(0,0,0,0.6);
+      --shadow-card: 0px 2px 12px rgba(0,0,0,0.4);
+      --shadow-card-hover: 0 8px 20px rgba(0,0,0,0.55);
+      --shadow-fab: 0 6px 16px rgba(0,0,0,0.5);
+      --r-sm: 8px; --r-md: 12px; --r-lg: 16px;
+      --pad: 16px; --gap: 24px;
+      --font: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+      --t-h1: 700 20px/1.3 var(--font);
+      --t-h2: 700 18px/1.3 var(--font);
+      --t-body: 400 15px/1.45 var(--font);
+      --t-body-m: 500 15px/1.45 var(--font);
+      --t-sm: 400 13px/1.4 var(--font);
+      --t-xs: 500 11px/1.2 var(--font);
+      --ease: 200ms ease;
+      --ease-out: 280ms cubic-bezier(0.16,1,0.3,1);
+      --device-w: 390px;
+      --tabbar-h: 72px;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    button { font: inherit; color: inherit; background: none; border: none; padding: 0; cursor: pointer; }
+    input, textarea { font: inherit; color: inherit; }
+    ul { list-style: none; padding: 0; margin: 0; }
+
+    body {
+      font: var(--t-body);
+      color: var(--ink);
+      background: #050505;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      -webkit-font-smoothing: antialiased;
+    }
+    .device {
+      width: var(--device-w);
+      height: 100vh;
+      background: var(--bg);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    @media (min-width: 430px) {
+      body { padding: 24px 0; align-items: flex-start; }
+      .device { height: 844px; border-radius: 32px; box-shadow: 0 24px 60px rgba(0,0,0,0.6); }
+    }
+    .scroll {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding: 20px var(--pad) calc(var(--tabbar-h) + 32px);
+      -webkit-overflow-scrolling: touch;
+    }
+
+    /* header */
+    .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--gap); }
+    .header h1 { margin: 0; font: var(--t-h1); }
+    .btn-finish {
+      font: 500 13px/1 var(--font); color: #fff; border: none;
+      border-radius: var(--r-sm); padding: 9px 13px;
+      background: #1470CC;
+      transition: transform var(--ease), background var(--ease);
+    }
+    .btn-finish:hover { background: #1260B8; }
+    .btn-finish:active { transform: scale(0.97); }
+    .btn-finish.pulse { animation: pulse 1.8s ease-in-out 2; }
+    @keyframes pulse {
+      0%,100% { box-shadow: 0 0 0 0 rgba(26,135,241,0); }
+      50% { box-shadow: 0 0 0 8px rgba(26,135,241,0.18); }
+    }
+
+    /* sections */
+    .section {
+      background: var(--card); border-radius: var(--r-md);
+      box-shadow: var(--shadow-card); padding: var(--pad); margin-bottom: var(--gap);
+    }
+    .section-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 12px; }
+    .section-head h2 { margin: 0; font: var(--t-h2); }
+    .section-meta { font: var(--t-sm); color: var(--ink-2); }
+
+    /* rows — outer clip container */
+    .row { position: relative; overflow: hidden; border-radius: var(--r-md); margin-bottom: 10px; }
+    .row:last-child { margin-bottom: 0; }
+    #task-list-done { margin-top: 16px; }
+
+    /* swipeable card face */
+    .row-swipe {
+      position: relative; z-index: 1;
+      background: var(--surface); border: 1px solid var(--line);
+      border-radius: var(--r-md); padding: 12px 14px;
+      display: flex; flex-direction: column;
+      will-change: transform;
+      transition: transform 0.42s cubic-bezier(0.34, 1.15, 0.64, 1);
+      user-select: none; -webkit-user-select: none;
+    }
+    .row-swipe.is-dragging { transition: none; }
+
+    /* delete zone revealed behind card */
+    .row-delete-bg {
+      position: absolute; right: 0; top: 0; bottom: 0; width: 88px;
+      background: #BF3535;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; border-radius: 0 var(--r-md) var(--r-md) 0;
+    }
+    .row-delete-bg svg { color: #fff; width: 20px; height: 20px; opacity: 0; transform: scale(0.6) translateX(6px); transition: opacity 0.2s, transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1); }
+    .row.swipe-open .row-delete-bg svg { opacity: 1; transform: scale(1) translateX(0); }
+
+    /* row content layout */
+    .row-main { display: flex; align-items: center; gap: 12px; }
+    .row .icon { flex-shrink: 0; width: 20px; height: 20px; color: var(--ink-2); display: grid; place-items: center; }
+    .row-label { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+    .row .label { font: var(--t-body); color: var(--ink); }
+    .row .row-cat { font: 400 11px/1.3 var(--font); color: var(--ink-3); }
+    .row .chev { flex-shrink: 0; width: 20px; height: 20px; color: var(--ink-2); transition: transform var(--ease); }
+    .row.open .chev { transform: rotate(180deg); }
+    .row-detail { display: none; padding: 8px 4px 4px 56px; align-items: flex-start; gap: 8px; }
+    .row.open .row-detail { display: flex; }
+    .row-detail-text { flex: 1; font: var(--t-sm); color: var(--ink-2); line-height: 1.5; }
+
+    /* checkbox */
+    .check {
+      flex-shrink: 0; width: 24px; height: 24px; border-radius: 50%;
+      border: 2px solid #3A3A3A; background: transparent;
+      display: grid; place-items: center; cursor: pointer;
+      transition: background var(--ease), border-color var(--ease);
+    }
+    .check:hover { border-color: var(--accent); }
+    .check svg { width: 14px; height: 14px; color: #fff; stroke-width: 3; opacity: 0; transform: scale(0.5); transition: opacity var(--ease), transform var(--ease); }
+    .row.done .check { background: var(--accent); border-color: var(--accent); }
+    .row.done .check svg { opacity: 1; transform: scale(1); }
+    .row.done .label { text-decoration: line-through; text-decoration-color: var(--strike); color: var(--strike); }
+    .row.done { opacity: 0.5; }
+    .row.removing .row-swipe { opacity: 0; transform: scale(0.96); transition: opacity 0.18s, transform 0.18s; }
+
+    /* notes */
+    .note .row-swipe { flex-direction: row; align-items: flex-start; gap: 4px; padding: 12px 14px; }
+    .note .avatar {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: var(--avatar-bg); color: var(--avatar-ink);
+      display: grid; place-items: center; font: 600 12px/1 var(--font); flex-shrink: 0;
+    }
+    .note-body { flex: 1; min-width: 0; }
+    .note .note-title { display: block; font: 600 14px/1.3 var(--font); color: var(--ink); margin-bottom: 4px; }
+    .note .label { font: var(--t-sm); line-height: 1.4; }
+    .note .edit { font: 500 13px/1 var(--font); color: var(--accent); flex-shrink: 0; align-self: flex-start; }
+    .note .edit:hover { text-decoration: underline; }
+
+    /* add / primary buttons */
+    .btn-add {
+      width: 100%; padding: 12px; border: none; border-radius: var(--r-md);
+      background: var(--btn-secondary); font: var(--t-body-m); color: var(--ink);
+      margin-top: 10px; transition: background var(--ease), transform var(--ease);
+    }
+    .btn-add:hover { background: #3A3A3A; }
+    .btn-add:active { transform: scale(0.99); }
+
+    .hint { font: italic 13px/1.4 var(--font); color: var(--hint); text-align: center; margin: 12px 0 4px; }
+    .empty { text-align: center; font: var(--t-body); color: var(--ink-2); padding: 20px 0 8px; }
+    .hidden { display: none !important; }
+
+    /* tab bar */
+    .tabbar {
+      position: absolute; left: 0; right: 0; bottom: 0;
+      height: var(--tabbar-h); background: var(--card); border-top: 1px solid var(--line);
+      display: grid; grid-template-columns: repeat(5,1fr);
+      align-items: center; padding: 0 8px; z-index: 5;
+    }
+    .tab { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--ink-3); transition: transform var(--ease), color var(--ease); padding: 6px 0; }
+    .tab svg { width: 22px; height: 22px; }
+    .tab span { font: var(--t-xs); }
+    .tab:active { transform: scale(1.1); }
+    .tab.active { color: var(--accent); }
+    .tab-fab {
+      align-self: center; justify-self: center; width: 56px; height: 56px;
+      border-radius: 50%; background: var(--accent); color: #fff;
+      display: grid; place-items: center; margin-top: -20px;
+      box-shadow: var(--shadow-fab); transition: transform var(--ease);
+    }
+    .tab-fab svg { width: 24px; height: 24px; }
+    .tab-fab:active { transform: scale(0.94); }
+    .tab-fab:hover { transform: translateY(-2px); }
+
+    /* sheet */
+    .sheet-overlay { position: absolute; inset: 0; background: var(--overlay); opacity: 0; pointer-events: none; transition: opacity var(--ease-out); z-index: 10; }
+    .sheet-overlay.open { opacity: 1; pointer-events: auto; }
+    .sheet {
+      position: absolute; left: 0; right: 0; bottom: 0;
+      background: var(--card); border-radius: var(--r-lg) var(--r-lg) 0 0;
+      transform: translateY(100%); transition: transform var(--ease-out);
+      z-index: 11; height: 82%; display: flex; flex-direction: column; overflow: hidden;
+    }
+    .sheet.open { transform: translateY(0); }
+    .sheet-handle { width: 40px; height: 4px; background: var(--handle); border-radius: 2px; margin: 10px auto 6px; flex-shrink: 0; }
+    .sheet-tabs { display: flex; gap: 4px; padding: 8px 16px 0; border-bottom: 1px solid var(--line); flex-shrink: 0; }
+    .sheet-tab { flex: 1; padding: 12px 4px; font: 500 14px/1 var(--font); color: var(--ink-2); border-bottom: 2px solid transparent; margin-bottom: -1px; transition: color var(--ease), border-color var(--ease); }
+    .sheet-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+    .sheet-body { flex: 1; min-height: 0; overflow-y: auto; padding: 16px; }
+    .sheet-foot { padding: 12px 16px 20px; border-top: 1px solid var(--line); background: var(--card); flex-shrink: 0; }
+    .sheet-foot-hint { font: italic 13px/1.4 var(--font); color: var(--hint); text-align: center; padding: 0 16px 8px; }
+
+    .search-wrap { position: relative; margin-bottom: 18px; }
+    .search-back { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 24px; height: 24px; background: transparent; border: none; color: var(--ink-2); display: none; align-items: center; justify-content: center; cursor: pointer; z-index: 1; padding: 0; transition: color var(--ease); }
+    .search-back svg { width: 18px; height: 18px; }
+    .search-back:hover { color: var(--ink); }
+    .search-wrap.active .search-back { display: flex; }
+    .search {
+      width: 100%; background: var(--surface); border: 1px solid var(--line);
+      color: var(--ink); border-radius: var(--r-md); padding: 12px 14px;
+      font: var(--t-body); outline: none;
+      transition: border-color var(--ease), box-shadow var(--ease), padding-left var(--ease);
+    }
+    .search-wrap.active .search { padding-left: 44px; }
+    .search::placeholder { color: var(--ink-3); }
+    .search:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(26,135,241,0.25); }
+
+    .sheet-section-title { font: 600 15px/1.3 var(--font); margin: 4px 0 10px; }
+    .sheet-section-title.spaced { margin-top: 18px; }
+
+    /* pick row — now supports inline detail input */
+    .pick-row {
+      display: flex; flex-direction: column; align-items: stretch; padding: 12px;
+      border: 1px solid var(--line); border-radius: var(--r-md); margin-bottom: 8px;
+      background: var(--surface); cursor: pointer;
+      transition: background var(--ease), border-color var(--ease);
+    }
+    .pick-row:hover { background: #2A2A2A; }
+    .pick-row.selected { border-color: var(--accent); background: rgba(26,135,241,0.12); }
+    .pick-row-main { display: flex; align-items: center; gap: 12px; width: 100%; }
+    .pick-row .radio { width: 20px; height: 20px; border-radius: 50%; border: 2px solid #3A3A3A; flex-shrink: 0; display: grid; place-items: center; transition: border-color var(--ease); }
+    .pick-row .radio::after { content: ''; width: 10px; height: 10px; border-radius: 50%; background: var(--accent); transform: scale(0); transition: transform var(--ease); }
+    .pick-row.selected .radio { border-color: var(--accent); }
+    .pick-row.selected .radio::after { transform: scale(1); }
+    .pick-row-label { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+    .pick-row .label { font: var(--t-body); }
+    .pick-row-detail {
+      display: none; margin-top: 10px; padding: 10px 12px;
+      background: var(--bg); border: 1px solid var(--line); border-radius: var(--r-sm);
+      color: var(--ink); font: var(--t-sm); outline: none; width: 100%;
+      transition: border-color var(--ease);
+    }
+    .pick-row-detail::placeholder { color: var(--ink-3); }
+    .pick-row-detail:focus { border-color: var(--accent); }
+    .pick-row.selected .pick-row-detail { display: block; }
+
+    /* one-off (text) button below a category list */
+    .btn-oneoff {
+      width: 100%; padding: 12px; border: 1px dashed var(--line);
+      border-radius: var(--r-md); background: transparent; color: var(--ink-2);
+      font: 500 13px/1.4 var(--font); text-align: center;
+      transition: border-color var(--ease), color var(--ease), background var(--ease);
+      margin: 4px 0 16px; cursor: pointer;
+    }
+    .btn-oneoff:hover { border-color: var(--accent); color: var(--ink); background: rgba(26,135,241,0.04); }
+
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0 12px; }
+    .chip { display: inline-flex; align-items: center; gap: 5px; padding: 8px 14px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); font: 500 13px/1 var(--font); color: var(--ink); transition: background var(--ease), color var(--ease), border-color var(--ease); cursor: pointer; }
+    .chip svg { width: 13px; height: 13px; flex-shrink: 0; }
+    .chip:hover { border-color: #444; }
+    .chip.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .pick-row-icon { width: 16px; height: 16px; flex-shrink: 0; color: var(--ink-2); display: grid; place-items: center; }
+    .pick-row-icon svg { width: 14px; height: 14px; }
+
+    .btn-primary {
+      width: 100%; padding: 14px; background: var(--accent); color: #fff;
+      border-radius: var(--r-md); font: 600 15px/1 var(--font);
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      transition: transform var(--ease), opacity var(--ease);
+    }
+    .btn-primary:active { transform: scale(0.99); }
+    .btn-primary[disabled] { opacity: 0.4; cursor: not-allowed; }
+    .badge { display: inline-flex; align-items: center; justify-content: center; min-width: 22px; height: 22px; padding: 0 6px; background: rgba(255,255,255,0.22); border-radius: 999px; font: 600 12px/1 var(--font); }
+
+    .field { display: block; margin-bottom: 14px; }
+    .field label { display: block; font: 500 13px/1 var(--font); color: var(--ink-2); margin-bottom: 6px; }
+    .field input, .field textarea {
+      width: 100%; padding: 12px 14px; border: 1px solid var(--line);
+      border-radius: var(--r-md); background: var(--surface); color: var(--ink);
+      font: var(--t-body); outline: none; transition: border-color var(--ease), box-shadow var(--ease); resize: vertical;
+    }
+    .field textarea { min-height: 80px; }
+    .field textarea.tall { min-height: 110px; }
+    .field input::placeholder, .field textarea::placeholder { color: var(--ink-3); }
+    .field input:focus, .field textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(26,135,241,0.2); }
+    .no-results { text-align: center; padding: 24px 0; font: var(--t-sm); color: var(--ink-3); }
+    .no-results-action { text-align: center; padding: 20px 0; font: var(--t-body); color: var(--ink-2); line-height: 1.5; }
+    .no-results-action .inline-link { background: none; border: none; padding: 0; color: var(--accent); font: inherit; cursor: pointer; text-decoration: underline; }
+
+    /* library browse (search focused, empty query) */
+    .lib-cat { border: 1px solid var(--line); border-radius: var(--r-md); margin-bottom: 6px; overflow: hidden; }
+    .lib-cat-head { display: flex; align-items: center; gap: 10px; padding: 12px 14px; cursor: pointer; background: var(--card); user-select: none; transition: background var(--ease); }
+    .lib-cat-head:hover { background: #2A2A2A; }
+    .lib-cat-icon { width: 18px; height: 18px; flex-shrink: 0; color: var(--ink-2); display: grid; place-items: center; }
+    .lib-cat-icon svg { width: 15px; height: 15px; }
+    .lib-cat-name { flex: 1; font: 500 14px/1.2 var(--font); color: var(--ink); }
+    .lib-cat-count { font: 400 12px/1 var(--font); color: var(--ink-3); }
+    .lib-cat-chev { width: 16px; height: 16px; display: grid; place-items: center; color: var(--ink-3); transition: transform var(--ease); }
+    .lib-cat-chev svg { width: 14px; height: 14px; }
+    .lib-cat.open .lib-cat-chev { transform: rotate(180deg); }
+    .lib-cat-body { display: none; border-top: 1px solid var(--line); padding: 8px; }
+    .lib-cat.open .lib-cat-body { display: block; }
+    .lib-cat-body .pick-row { margin-bottom: 4px; }
+    .lib-cat-body .pick-row:last-child { margin-bottom: 0; }
+
+    /* category label in search results */
+    .pick-row-cat { display: block; font: 400 11px/1.3 var(--font); color: var(--ink-3); margin-top: 1px; }
+  </style>
+</head>
+<body>
+  <div class="device" id="device">
+    <main class="scroll">
+      <header class="header">
+        <h1>Your handover</h1>
+        <button class="btn-finish pulse" type="button">Finish handover</button>
+      </header>
+
+      <section class="section">
+        <div class="section-head">
+          <h2>Tasks</h2>
+          <span class="section-meta" id="tasks-meta"></span>
+        </div>
+        <ul id="task-list"></ul>
+        <ul id="task-list-done"></ul>
+        <p class="empty hidden" id="tasks-empty">No tasks added yet</p>
+        <button class="btn-add" data-open-sheet="task">Add task</button>
+      </section>
+
+      <section class="section">
+        <div class="section-head">
+          <h2>Notes</h2>
+          <span class="section-meta" id="notes-meta"></span>
+        </div>
+        <ul id="notes-list"></ul>
+        <p class="empty hidden" id="notes-empty">No notes added yet</p>
+        <button class="btn-add" data-open-sheet="note">Add note</button>
+      </section>
+
+      <section class="section">
+        <div class="section-head">
+          <h2>Reports</h2>
+          <span class="section-meta" id="reports-meta"></span>
+        </div>
+        <ul id="reports-list"></ul>
+        <p class="empty hidden" id="reports-empty">No report added yet</p>
+        <p class="hint hidden" id="reports-hint">Most shifts have something worth flagging. It all helps.</p>
+        <button class="btn-add" data-open-sheet="report">Add report</button>
+      </section>
+    </main>
+
+    <nav class="tabbar">
+      <button class="tab active"><i data-lucide="clipboard-list"></i><span>Handover</span></button>
+      <button class="tab"><i data-lucide="history"></i><span>History</span></button>
+      <button class="tab-fab" data-open-sheet="task"><i data-lucide="plus"></i></button>
+      <button class="tab"><i data-lucide="users"></i><span>Team</span></button>
+      <button class="tab"><i data-lucide="user"></i><span>Profile</span></button>
+    </nav>
+
+    <div class="sheet-overlay" id="sheet-overlay"></div>
+    <div class="sheet" id="sheet" role="dialog" aria-modal="true">
+      <div class="sheet-handle" id="sheet-handle"></div>
+      <div class="sheet-tabs">
+        <button class="sheet-tab active" data-sheet-tab="task">Add task</button>
+        <button class="sheet-tab" data-sheet-tab="note">Add note</button>
+        <button class="sheet-tab" data-sheet-tab="report">Add report</button>
+      </div>
+
+      <!-- Add task panel -->
+      <div class="sheet-body" data-sheet-panel="task">
+        <div class="search-wrap" id="task-search-wrap">
+          <button class="search-back" id="task-search-back" aria-label="Back"><i data-lucide="arrow-left"></i></button>
+          <input class="search" type="search" id="task-search" placeholder="Search tasks…" autocomplete="off" />
+        </div>
+        <div id="task-sheet-content"></div>
+      </div>
+
+      <!-- Add note panel -->
+      <div class="sheet-body hidden" data-sheet-panel="note">
+        <div class="sheet-section-title">Leave a note for the next shift</div>
+        <div class="field">
+          <input type="text" id="note-title" placeholder="Note title (optional)" />
+        </div>
+        <div class="field">
+          <textarea id="note-message" class="tall" rows="6" placeholder="Your message…"></textarea>
+        </div>
+      </div>
+
+      <!-- Add report panel -->
+      <div class="sheet-body hidden" data-sheet-panel="report">
+        <div class="search-wrap" id="report-search-wrap">
+          <button class="search-back" id="report-search-back" aria-label="Back"><i data-lucide="arrow-left"></i></button>
+          <input class="search" type="search" id="report-search" placeholder="Search reports…" autocomplete="off" />
+        </div>
+        <div id="report-sheet-content"></div>
+      </div>
+
+      <p class="sheet-foot-hint hidden" id="sheet-foot-hint">Most shifts have something worth flagging. It all helps.</p>
+
+      <div class="sheet-foot">
+        <button class="btn-primary" id="sheet-submit" disabled>
+          <span id="sheet-submit-label">Add to handover</span>
+          <span class="badge hidden" id="sheet-badge"></span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+  (function () {
+    'use strict';
+
+    /* ===== STATE ===== */
+    const state = {
+      user: { name: 'Maria Kowalski', initials: 'MK', avatarColor: '#2A2A4A' },
+      currentHandover: {
+        tasks: [
+          { id: 1, title: 'Clean espresso machine', category: 'Cleaning', completed: false, description: 'Use the cleaning tablets from the supply cupboard. Run two cycles.' },
+          { id: 2, title: 'Restock oat milk', category: 'Stock', completed: false, description: '' },
+          { id: 3, title: 'Wipe down counter', category: 'Cleaning', completed: false, description: '' },
+          { id: 4, title: 'Mop floor behind counter', category: 'Cleaning', completed: true, description: '' }
+        ],
+        notes: [
+          { id: 1, author: 'MK', avatarColor: '#2A2A4A', title: '', text: 'Guy coming back at 17:00 to pay for his americano — he had a large one' },
+          { id: 2, author: 'MK', avatarColor: '#2A2A4A', title: '', text: 'Oat milk delivery arrived, extra 4 cartons in the back cupboard' }
+        ],
+        reports: [
+          { id: 1, category: 'Complaints', title: 'Customer waited too long', description: 'Busy lunch period, queue out the door' }
+        ]
+      },
+      taskLibrary: {
+        Cleaning: [
+          { id: 'c1', title: 'Clean espresso machine group heads', frequency: 98 },
+          { id: 'c2', title: 'Clean milk steamer wands', frequency: 95 },
+          { id: 'c3', title: 'Wipe down counter and work surfaces', frequency: 92 },
+          { id: 'c4', title: 'Clean coffee grinder', frequency: 80 },
+          { id: 'c5', title: 'Wipe display cabinet glass', frequency: 70 },
+          { id: 'c6', title: 'Mop floor behind counter', frequency: 88 },
+          { id: 'c7', title: 'Clean customer toilets', frequency: 75 },
+          { id: 'c8', title: 'Empty and clean bins', frequency: 72 },
+          { id: 'c9', title: 'Wipe down tables and chairs', frequency: 85 },
+          { id: 'c10', title: 'Clean fridge shelves', frequency: 60 }
+        ],
+        Stock: [
+          { id: 's1', title: 'Restock oat milk', frequency: 96 },
+          { id: 's2', title: 'Restock whole milk', frequency: 94 },
+          { id: 's3', title: 'Restock coffee beans', frequency: 90 },
+          { id: 's4', title: 'Restock takeaway cups — small', frequency: 82 },
+          { id: 's5', title: 'Restock takeaway cups — large', frequency: 80 },
+          { id: 's6', title: 'Restock cup sleeves', frequency: 75 },
+          { id: 's7', title: 'Restock napkins', frequency: 88 },
+          { id: 's8', title: 'Restock sugar and sweeteners', frequency: 70 },
+          { id: 's9', title: 'Restock lids', frequency: 72 },
+          { id: 's10', title: 'Check and restock fridge display', frequency: 65 }
+        ],
+        Equipment: [
+          { id: 'e1', title: 'Descale espresso machine', frequency: 55 },
+          { id: 'e2', title: 'Check fridge temperature', frequency: 78 },
+          { id: 'e3', title: 'Check freezer temperature', frequency: 75 },
+          { id: 'e4', title: 'Empty dishwasher', frequency: 85 },
+          { id: 'e5', title: 'Check card reader is working', frequency: 70 },
+          { id: 'e6', title: 'Replace till roll', frequency: 60 },
+          { id: 'e7', title: 'Check coffee grinder settings', frequency: 65 }
+        ],
+        Prep: [
+          { id: 'p1', title: 'Prep fresh milk jugs for next shift', frequency: 90 },
+          { id: 'p2', title: 'Label and date all open stock', frequency: 85 },
+          { id: 'p3', title: 'Prep syrup bottles', frequency: 75 },
+          { id: 'p4', title: 'Restock condiment station', frequency: 80 },
+          { id: 'p5', title: 'Bake — restock pastries', frequency: 70 },
+          { id: 'p6', title: 'Prep cold brew for tomorrow', frequency: 55 }
+        ],
+        Admin: [
+          { id: 'a1', title: 'Count and balance till', frequency: 95 },
+          { id: 'a2', title: 'Log waste', frequency: 75 },
+          { id: 'a3', title: 'Check next day opening supplies', frequency: 70 },
+          { id: 'a4', title: 'Sign delivery receipt', frequency: 50 },
+          { id: 'a5', title: 'Complete temperature log', frequency: 65 }
+        ]
+      },
+      commonTasks: ['c1', 's1', 's7', 'p2'],
+      reportLibrary: {
+        Complaints: [
+          { id: 'r1', title: 'Customer waited too long', frequency: 90 },
+          { id: 'r2', title: 'Wrong order given to customer', frequency: 75 },
+          { id: 'r3', title: 'Customer unhappy with product quality', frequency: 70 },
+          { id: 'r4', title: 'Customer was rude to staff', frequency: 65 },
+          { id: 'r5', title: 'Customer left without paying', frequency: 40 },
+          { id: 'r6', title: 'Complaint about cleanliness', frequency: 55 },
+          { id: 'r7', title: 'Customer asked for refund', frequency: 60 }
+        ],
+        Till: [
+          { id: 't1', title: 'Till is short — amount unknown', frequency: 60 },
+          { id: 't2', title: 'Till is short — amount noted', frequency: 55 },
+          { id: 't3', title: 'Till is over', frequency: 45 },
+          { id: 't4', title: 'Manual refund given — receipt in drawer', frequency: 80 },
+          { id: 't5', title: 'Large cash payment taken', frequency: 70 },
+          { id: 't6', title: 'Card reader issue — some payments may have failed', frequency: 50 },
+          { id: 't7', title: 'Void transaction made — reason noted', frequency: 40 }
+        ],
+        Injury: [
+          { id: 'i1', title: 'Staff member cut — first aid applied', frequency: 55 },
+          { id: 'i2', title: 'Staff member burned — first aid applied', frequency: 45 },
+          { id: 'i3', title: 'Staff member slipped or fell', frequency: 40 },
+          { id: 'i4', title: 'Customer injured on premises', frequency: 25 },
+          { id: 'i5', title: 'First aid kit needs restocking', frequency: 50 }
+        ],
+        Stock: [
+          { id: 'st1', title: 'Oat milk — almost out', frequency: 92 },
+          { id: 'st2', title: 'Whole milk — almost out', frequency: 88 },
+          { id: 'st3', title: 'Decaf beans — running low', frequency: 75 },
+          { id: 'st4', title: 'Large takeaway cups — less than one sleeve', frequency: 80 },
+          { id: 'st5', title: 'Napkins — one pack remaining', frequency: 78 },
+          { id: 'st6', title: 'Almond milk — almost out', frequency: 70 },
+          { id: 'st7', title: 'Cup sleeves — running low', frequency: 65 },
+          { id: 'st8', title: 'Pastries — sold out before end of shift', frequency: 60 }
+        ]
+      },
+      commonReports: ['r1', 't4', 'st1', 'i1']
+    };
+
+    /* ===== HELPERS ===== */
+    const TASK_ICONS = { Cleaning: 'sparkles', Stock: 'package', Equipment: 'wrench', Prep: 'chef-hat', Admin: 'clipboard-list', Other: 'tag' };
+    const REPORT_ICONS = { Complaints: 'alert-circle', Till: 'receipt', Injury: 'activity', Stock: 'package', Other: 'tag' };
+    const REPORT_NOUN = { Complaints: 'complaint', Till: 'till', Injury: 'injury', Stock: 'stock' };
+    const TASK_CATEGORIES = ['Cleaning', 'Stock', 'Equipment', 'Prep', 'Admin', 'Other'];
+    const REPORT_CATEGORIES = ['Complaints', 'Till', 'Injury', 'Stock', 'Other'];
+
+    function taskIcon(cat) { return TASK_ICONS[cat] || 'tag'; }
+    function reportIcon(cat) { return REPORT_ICONS[cat] || 'alert-circle'; }
+    const byFreq = (a, b) => (b.frequency || 0) - (a.frequency || 0);
+    function sortedCats(library) {
+      return Object.entries(library)
+        .map(([c, items]) => ({ c, items: [...items].sort(byFreq), maxFreq: Math.max(...items.map(i => i.frequency || 0)) }))
+        .sort((a, b) => b.maxFreq - a.maxFreq);
+    }
+    function esc(s) {
+      return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+    function findLibraryTask(id) {
+      for (const [cat, tasks] of Object.entries(state.taskLibrary)) {
+        const t = tasks.find(t => t.id === id);
+        if (t) return { ...t, category: cat };
+      }
+      return null;
+    }
+    function findLibraryReport(id) {
+      for (const [cat, reports] of Object.entries(state.reportLibrary)) {
+        const r = reports.find(r => r.id === id);
+        if (r) return { ...r, category: cat };
+      }
+      return null;
+    }
+    function nextId(arr) { return arr.length ? Math.max(...arr.map(x => x.id)) + 1 : 1; }
+    function icons() { if (window.lucide) window.lucide.createIcons(); }
+
+    /* ===== SHEET UI STATE ===== */
+    const ui = {
+      selectedTaskIds: new Set(),
+      selectedReportIds: new Set(),
+      activeCat: null,
+      activeReportCat: null,
+      oneOffTaskMode: false,
+      oneOffReportMode: false,
+      editingNoteId: null,
+      searchQuery: '',
+      reportSearchQuery: '',
+      searchFocused: false,
+      reportSearchFocused: false,
+      taskExpandedCats: new Set(),
+      reportExpandedCats: new Set(),
+      taskDetails: {},
+      reportDetails: {},
+      otherTaskTitle: '',
+      otherTaskDetails: '',
+      otherReportTitle: '',
+      otherReportDetails: '',
+      noteTitle: '',
+      noteMessage: ''
+    };
+
+    /* ===== ROW BUILDERS (main handover screen) ===== */
+    function buildTaskRow(task) {
+      const li = document.createElement('li');
+      li.className = 'row' + (task.completed ? ' done' : '');
+      li.dataset.taskId = task.id;
+      const icon = taskIcon(task.category);
+      const hasDesc = !!task.description;
+      li.innerHTML = `
+        <div class="row-delete-bg"><i data-lucide="trash-2"></i></div>
+        <div class="row-swipe">
+          <div class="row-main">
+            <button class="check" aria-label="Toggle complete">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg>
+            </button>
+            <span class="icon"><i data-lucide="${icon}"></i></span>
+            <div class="row-label">
+              <span class="label">${esc(task.title)}</span>
+              <span class="row-cat">${esc(task.category)}</span>
+            </div>
+            ${hasDesc ? `<button class="chev" aria-label="Toggle detail"><i data-lucide="chevron-down"></i></button>` : ''}
+          </div>
+          ${hasDesc ? `<div class="row-detail"><span class="row-detail-text">${esc(task.description)}</span></div>` : ''}
+        </div>`;
+      return li;
+    }
+
+    function buildNoteRow(note) {
+      const li = document.createElement('li');
+      li.className = 'row note';
+      li.dataset.noteId = note.id;
+      li.innerHTML = `
+        <div class="row-delete-bg"><i data-lucide="trash-2"></i></div>
+        <div class="row-swipe">
+          <div class="avatar" style="background:${esc(note.avatarColor)}">${esc(note.author)}</div>
+          <div class="note-body">
+            ${note.title ? `<span class="note-title">${esc(note.title)}</span>` : ''}
+            <span class="label">${esc(note.text)}</span>
+          </div>
+          <button class="edit" data-note-id="${note.id}">edit</button>
+        </div>`;
+      return li;
+    }
+
+    function buildReportRow(report) {
+      const li = document.createElement('li');
+      li.className = 'row';
+      li.dataset.reportId = report.id;
+      const icon = reportIcon(report.category);
+      const hasDesc = !!report.description;
+      li.innerHTML = `
+        <div class="row-delete-bg"><i data-lucide="trash-2"></i></div>
+        <div class="row-swipe">
+          <div class="row-main">
+            <span class="icon"><i data-lucide="${icon}"></i></span>
+            <span class="label">${esc(report.title)}</span>
+            ${hasDesc ? `<button class="chev" aria-label="Toggle detail"><i data-lucide="chevron-down"></i></button>` : ''}
+          </div>
+          ${hasDesc ? `<div class="row-detail"><span class="row-detail-text">${esc(report.description)}</span></div>` : ''}
+        </div>`;
+      return li;
+    }
+
+    /* ===== MAIN-SCREEN RENDER ===== */
+    function renderTasks() {
+      const active = document.getElementById('task-list');
+      const done = document.getElementById('task-list-done');
+      const empty = document.getElementById('tasks-empty');
+      const meta = document.getElementById('tasks-meta');
+      active.innerHTML = '';
+      done.innerHTML = '';
+      const activeTasks = state.currentHandover.tasks.filter(t => !t.completed);
+      const doneTasks = state.currentHandover.tasks.filter(t => t.completed);
+      activeTasks.forEach(t => active.appendChild(buildTaskRow(t)));
+      doneTasks.forEach(t => done.appendChild(buildTaskRow(t)));
+      done.style.display = doneTasks.length ? '' : 'none';
+      empty.classList.toggle('hidden', state.currentHandover.tasks.length > 0);
+      meta.textContent = `${activeTasks.length} unfinished task${activeTasks.length !== 1 ? 's' : ''}`;
+      icons();
+    }
+
+    function renderNotes() {
+      const list = document.getElementById('notes-list');
+      const empty = document.getElementById('notes-empty');
+      const meta = document.getElementById('notes-meta');
+      list.innerHTML = '';
+      state.currentHandover.notes.forEach(n => list.appendChild(buildNoteRow(n)));
+      const count = state.currentHandover.notes.length;
+      empty.classList.toggle('hidden', count > 0);
+      meta.textContent = `${count} note${count !== 1 ? 's' : ''}`;
+      icons();
+    }
+
+    function renderReports() {
+      const list = document.getElementById('reports-list');
+      const empty = document.getElementById('reports-empty');
+      const hint = document.getElementById('reports-hint');
+      const meta = document.getElementById('reports-meta');
+      list.innerHTML = '';
+      state.currentHandover.reports.forEach(r => list.appendChild(buildReportRow(r)));
+      const count = state.currentHandover.reports.length;
+      empty.classList.toggle('hidden', count > 0);
+      hint.classList.toggle('hidden', count > 0);
+      meta.textContent = `${count} report${count !== 1 ? 's' : ''}`;
+      icons();
+    }
+
+    /* ===== SHEET PIECES ===== */
+    function pickRowHTML(libId, title, kind, category, showCat) {
+      const selected = kind === 'task' ? ui.selectedTaskIds.has(libId) : ui.selectedReportIds.has(libId);
+      const detailVal = kind === 'task' ? (ui.taskDetails[libId] || '') : (ui.reportDetails[libId] || '');
+      const dataAttr = kind === 'task' ? `data-lib-id="${esc(libId)}"` : `data-rep-id="${esc(libId)}"`;
+      const iconName = category ? (kind === 'task' ? taskIcon(category) : reportIcon(category)) : null;
+      const iconEl = iconName ? `<span class="pick-row-icon"><i data-lucide="${iconName}"></i></span>` : '';
+      const catLabel = category ? `<span class="pick-row-cat">${esc(category)}</span>` : '';
+      return `
+        <li class="pick-row${selected ? ' selected' : ''}" ${dataAttr}>
+          <div class="pick-row-main">
+            <span class="radio"></span>
+            ${iconEl}
+            <div class="pick-row-label">
+              <span class="label">${esc(title)}</span>
+              ${catLabel}
+            </div>
+          </div>
+          <input type="text" class="pick-row-detail" placeholder="Add details (optional)" value="${esc(detailVal)}" />
+        </li>`;
+    }
+
+    function chipsHTML(categories, active, attr, iconsMap) {
+      let html = '<div class="chips">';
+      categories.forEach(c => {
+        const iconName = iconsMap ? (iconsMap[c] || 'tag') : null;
+        const iconEl = iconName ? `<i data-lucide="${iconName}"></i>` : '';
+        html += `<button class="chip${active === c ? ' active' : ''}" ${attr}="${esc(c)}">${iconEl}${esc(c)}</button>`;
+      });
+      html += '</div>';
+      return html;
+    }
+
+    function taskOneOffFormHTML() {
+      return `
+        <div class="sheet-section-title">Add a one-off task for today's handover only</div>
+        <div class="field">
+          <input type="text" id="other-title" placeholder="Task title" value="${esc(ui.otherTaskTitle)}" />
+        </div>
+        <div class="field">
+          <textarea id="other-details" placeholder="Add more detail (optional)">${esc(ui.otherTaskDetails)}</textarea>
+        </div>`;
+    }
+
+    function reportOneOffFormHTML(headingCat) {
+      const noun = REPORT_NOUN[headingCat];
+      const label = noun
+        ? `Add a one-off ${noun} report for today's handover only`
+        : `Add a one-off report for today's handover only`;
+      return `
+        <div class="sheet-section-title">${esc(label)}</div>
+        <div class="field">
+          <input type="text" id="other-report-title" placeholder="Report title" value="${esc(ui.otherReportTitle)}" />
+        </div>
+        <div class="field">
+          <textarea id="other-report-details" placeholder="Add more detail (optional)">${esc(ui.otherReportDetails)}</textarea>
+        </div>`;
+    }
+
+    /* ===== TASK SHEET ===== */
+    function renderTaskSheet() {
+      const container = document.getElementById('task-sheet-content');
+      if (!container) return;
+
+      const q = ui.searchQuery.trim().toLowerCase();
+      const cat = ui.activeCat;
+      let html = '';
+
+      // Search focused, no query — full library, categories ordered by max frequency
+      if (ui.searchFocused && !q) {
+        sortedCats(state.taskLibrary).forEach(({ c, items }) => {
+          const open = ui.taskExpandedCats.has(c);
+          html += `<div class="lib-cat${open ? ' open' : ''}" data-lib-cat="${esc(c)}">
+            <div class="lib-cat-head">
+              <span class="lib-cat-icon"><i data-lucide="${taskIcon(c)}"></i></span>
+              <span class="lib-cat-name">${esc(c)}</span>
+              <span class="lib-cat-count">${items.length}</span>
+              <span class="lib-cat-chev"><i data-lucide="chevron-down"></i></span>
+            </div>
+            <ul class="lib-cat-body">`;
+          items.forEach(t => { html += pickRowHTML(t.id, t.title, 'task', c); });
+          html += `</ul></div>`;
+        });
+        container.innerHTML = html;
+        icons();
+        updateSubmit();
+        return;
+      }
+
+      // Search mode with query — starts-with first, then contains, each group sorted by frequency desc
+      if (q) {
+        const starts = [], contains = [];
+        for (const [c, tasks] of Object.entries(state.taskLibrary)) {
+          tasks.forEach(t => {
+            const tl = t.title.toLowerCase();
+            if (tl.startsWith(q)) starts.push({ ...t, category: c });
+            else if (tl.includes(q)) contains.push({ ...t, category: c });
+          });
+        }
+        if (starts.length || contains.length) {
+          starts.sort(byFreq);
+          contains.sort(byFreq);
+          html += `<ul>`;
+          [...starts, ...contains].forEach(t => { html += pickRowHTML(t.id, t.title, 'task', t.category, true); });
+          html += '</ul>';
+        } else {
+          html += `<div class="no-results-action"><p>No tasks found. <button class="inline-link" data-no-results-oneoff="task">Add a one-off task instead.</button></p></div>`;
+        }
+        container.innerHTML = html;
+        icons();
+        updateSubmit();
+        return;
+      }
+
+      // Other chip selected — form only
+      if (cat === 'Other') {
+        html += chipsHTML(TASK_CATEGORIES, cat, 'data-cat', TASK_ICONS);
+        html += taskOneOffFormHTML();
+        container.innerHTML = html;
+        icons();
+        updateSubmit();
+        return;
+      }
+
+      // One-off form inside a category
+      if (cat && ui.oneOffTaskMode) {
+        html += chipsHTML(TASK_CATEGORIES, cat, 'data-cat', TASK_ICONS);
+        html += taskOneOffFormHTML();
+        container.innerHTML = html;
+        icons();
+        updateSubmit();
+        return;
+      }
+
+      // Category list — sorted by frequency desc
+      if (cat) {
+        html += chipsHTML(TASK_CATEGORIES, cat, 'data-cat', TASK_ICONS);
+        html += `<div class="sheet-section-title">${esc(cat)}</div><ul>`;
+        [...(state.taskLibrary[cat] || [])].sort(byFreq).forEach(t => { html += pickRowHTML(t.id, t.title, 'task', cat); });
+        html += '</ul>';
+        html += `<button class="btn-oneoff" data-task-oneoff="true">Add a one-off task for today's handover only</button>`;
+        container.innerHTML = html;
+        icons();
+        updateSubmit();
+        return;
+      }
+
+      // Default — chips, Common section (frequency ordered), then full library
+      html += chipsHTML(TASK_CATEGORIES, cat, 'data-cat', TASK_ICONS);
+      const commonTaskItems = state.commonTasks.map(id => findLibraryTask(id)).filter(Boolean).sort(byFreq);
+      html += `<div class="sheet-section-title">Common</div><ul>`;
+      commonTaskItems.forEach(t => { html += pickRowHTML(t.id, t.title, 'task', t.category); });
+      html += '</ul>';
+      sortedCats(state.taskLibrary).forEach(({ c, items }) => {
+        html += `<div class="sheet-section-title spaced">${esc(c)}</div><ul>`;
+        items.forEach(t => { html += pickRowHTML(t.id, t.title, 'task', c); });
+        html += '</ul>';
+      });
+
+      container.innerHTML = html;
+      icons();
+      updateSubmit();
+    }
+
+    /* ===== REPORT SHEET ===== */
+    function renderReportSheet() {
+      const container = document.getElementById('report-sheet-content');
+      if (!container) return;
+
+      const q = ui.reportSearchQuery.trim().toLowerCase();
+      const cat = ui.activeReportCat;
+      let html = '';
+
+      // Search focused, no query — full library, categories ordered by max frequency
+      if (ui.reportSearchFocused && !q) {
+        sortedCats(state.reportLibrary).forEach(({ c, items }) => {
+          const open = ui.reportExpandedCats.has(c);
+          html += `<div class="lib-cat${open ? ' open' : ''}" data-rep-lib-cat="${esc(c)}">
+            <div class="lib-cat-head">
+              <span class="lib-cat-icon"><i data-lucide="${reportIcon(c)}"></i></span>
+              <span class="lib-cat-name">${esc(c)}</span>
+              <span class="lib-cat-count">${items.length}</span>
+              <span class="lib-cat-chev"><i data-lucide="chevron-down"></i></span>
+            </div>
+            <ul class="lib-cat-body">`;
+          items.forEach(r => { html += pickRowHTML(r.id, r.title, 'report', c); });
+          html += `</ul></div>`;
+        });
+        container.innerHTML = html;
+        icons();
+        updateSubmit();
+        return;
+      }
+
+      // Search with query — starts-with first, then contains, each group by frequency desc
+      if (q) {
+        const starts = [], contains = [];
+        for (const [c, reports] of Object.entries(state.reportLibrary)) {
+          reports.forEach(r => {
+            const rl = r.title.toLowerCase();
+            if (rl.startsWith(q)) starts.push({ ...r, category: c });
+            else if (rl.includes(q)) contains.push({ ...r, category: c });
+          });
+        }
+        if (starts.length || contains.length) {
+          starts.sort(byFreq);
+          contains.sort(byFreq);
+          html += `<ul>`;
+          [...starts, ...contains].forEach(r => { html += pickRowHTML(r.id, r.title, 'report', r.category, true); });
+          html += '</ul>';
+        } else {
+          html += `<div class="no-results-action"><p>No reports found. <button class="inline-link" data-no-results-oneoff="report">Add a one-off report instead.</button></p></div>`;
+        }
+        container.innerHTML = html;
+        icons();
+        updateSubmit();
+        return;
+      }
+
+      if (cat === 'Other') {
+        html += chipsHTML(REPORT_CATEGORIES, cat, 'data-report-cat', REPORT_ICONS);
+        html += reportOneOffFormHTML(null);
+        container.innerHTML = html;
+        icons();
+        updateSubmit();
+        return;
+      }
+
+      if (cat && ui.oneOffReportMode) {
+        html += chipsHTML(REPORT_CATEGORIES, cat, 'data-report-cat', REPORT_ICONS);
+        html += reportOneOffFormHTML(cat);
+        container.innerHTML = html;
+        icons();
+        updateSubmit();
+        return;
+      }
+
+      // Category list — sorted by frequency desc
+      if (cat) {
+        const noun = REPORT_NOUN[cat] || '';
+        html += chipsHTML(REPORT_CATEGORIES, cat, 'data-report-cat', REPORT_ICONS);
+        html += `<div class="sheet-section-title">${esc(cat)}</div><ul>`;
+        [...(state.reportLibrary[cat] || [])].sort(byFreq).forEach(r => { html += pickRowHTML(r.id, r.title, 'report', cat); });
+        html += '</ul>';
+        html += `<button class="btn-oneoff" data-report-oneoff="true">Add a one-off ${esc(noun)} report for today's handover only</button>`;
+        container.innerHTML = html;
+        icons();
+        updateSubmit();
+        return;
+      }
+
+      // Default — chips, Common section (frequency ordered), then full library
+      html += chipsHTML(REPORT_CATEGORIES, cat, 'data-report-cat', REPORT_ICONS);
+      const commonReportItems = state.commonReports.map(id => findLibraryReport(id)).filter(Boolean).sort(byFreq);
+      html += `<div class="sheet-section-title">Common</div><ul>`;
+      commonReportItems.forEach(r => { html += pickRowHTML(r.id, r.title, 'report', r.category); });
+      html += '</ul>';
+      sortedCats(state.reportLibrary).forEach(({ c, items }) => {
+        html += `<div class="sheet-section-title spaced">${esc(c)}</div><ul>`;
+        items.forEach(r => { html += pickRowHTML(r.id, r.title, 'report', c); });
+        html += '</ul>';
+      });
+
+      container.innerHTML = html;
+      icons();
+      updateSubmit();
+    }
+
+    /* ===== SUBMIT STATE ===== */
+    function updateSubmit() {
+      const btn = document.getElementById('sheet-submit');
+      const badge = document.getElementById('sheet-badge');
+      if (!btn) return;
+      const panel = document.querySelector('[data-sheet-panel]:not(.hidden)');
+      if (!panel) return;
+      const which = panel.dataset.sheetPanel;
+      let enabled = false, count = 0;
+
+      if (which === 'task') {
+        const inOneOff = ui.activeCat === 'Other' || (ui.activeCat && ui.oneOffTaskMode);
+        if (inOneOff) {
+          enabled = !!ui.otherTaskTitle.trim();
+        } else {
+          count = ui.selectedTaskIds.size;
+          enabled = count > 0;
+        }
+      } else if (which === 'note') {
+        enabled = !!ui.noteMessage.trim();
+      } else if (which === 'report') {
+        const inOneOff = ui.activeReportCat === 'Other' || (ui.activeReportCat && ui.oneOffReportMode);
+        if (inOneOff) {
+          enabled = !!ui.otherReportTitle.trim();
+        } else {
+          count = ui.selectedReportIds.size;
+          enabled = count > 0;
+        }
+      }
+
+      btn.disabled = !enabled;
+      if (badge) {
+        if (count > 0) { badge.textContent = String(count); badge.classList.remove('hidden'); }
+        else { badge.classList.add('hidden'); }
+      }
+    }
+
+    /* ===== SHEET OPEN / CLOSE ===== */
+    function openSheet(which) {
+      document.getElementById('sheet-overlay').classList.add('open');
+      document.getElementById('sheet').classList.add('open');
+      switchTab(which || 'task');
+    }
+
+    function resetSheetState() {
+      ui.selectedTaskIds.clear();
+      ui.selectedReportIds.clear();
+      ui.activeCat = null;
+      ui.activeReportCat = null;
+      ui.oneOffTaskMode = false;
+      ui.oneOffReportMode = false;
+      ui.editingNoteId = null;
+      ui.searchQuery = '';
+      ui.reportSearchQuery = '';
+      ui.searchFocused = false;
+      ui.reportSearchFocused = false;
+      document.getElementById('task-search-wrap')?.classList.remove('active');
+      document.getElementById('report-search-wrap')?.classList.remove('active');
+      ui.taskExpandedCats.clear();
+      ui.reportExpandedCats.clear();
+      ui.taskDetails = {};
+      ui.reportDetails = {};
+      ui.otherTaskTitle = '';
+      ui.otherTaskDetails = '';
+      ui.otherReportTitle = '';
+      ui.otherReportDetails = '';
+      ui.noteTitle = '';
+      ui.noteMessage = '';
+      const ts = document.getElementById('task-search'); if (ts) ts.value = '';
+      const rs = document.getElementById('report-search'); if (rs) rs.value = '';
+      const nt = document.getElementById('note-title'); if (nt) nt.value = '';
+      const nm = document.getElementById('note-message'); if (nm) nm.value = '';
+    }
+
+    function closeSheet() {
+      document.getElementById('sheet').classList.remove('open');
+      document.getElementById('sheet-overlay').classList.remove('open');
+      resetSheetState();
+      updateSubmit();
+    }
+
+    function switchTab(name) {
+      document.querySelectorAll('.sheet-tab').forEach(t => t.classList.toggle('active', t.dataset.sheetTab === name));
+      document.querySelectorAll('[data-sheet-panel]').forEach(p => p.classList.toggle('hidden', p.dataset.sheetPanel !== name));
+
+      const label = document.getElementById('sheet-submit-label');
+      if (label) {
+        if (name === 'note') label.textContent = ui.editingNoteId ? 'Update note' : 'Add note';
+        else label.textContent = 'Add to handover';
+      }
+
+      const footHint = document.getElementById('sheet-foot-hint');
+      if (footHint) footHint.classList.toggle('hidden', name !== 'report');
+
+      if (name === 'task') renderTaskSheet();
+      if (name === 'report') renderReportSheet();
+      updateSubmit();
+    }
+
+    /* ===== SUBMIT ===== */
+    function submitSheet() {
+      const btn = document.getElementById('sheet-submit');
+      btn.style.opacity = '0.7';
+      const panel = document.querySelector('[data-sheet-panel]:not(.hidden)');
+      const which = panel ? panel.dataset.sheetPanel : null;
+
+      if (which === 'task') {
+        const inOneOff = ui.activeCat === 'Other' || (ui.activeCat && ui.oneOffTaskMode);
+        if (inOneOff) {
+          state.currentHandover.tasks.push({
+            id: nextId(state.currentHandover.tasks),
+            title: ui.otherTaskTitle.trim(),
+            category: ui.activeCat === 'Other' ? 'Other' : ui.activeCat,
+            completed: false,
+            description: ui.otherTaskDetails.trim()
+          });
+        } else {
+          ui.selectedTaskIds.forEach(libId => {
+            const t = findLibraryTask(libId);
+            if (!t) return;
+            state.currentHandover.tasks.push({
+              id: nextId(state.currentHandover.tasks),
+              title: t.title,
+              category: t.category,
+              completed: false,
+              description: (ui.taskDetails[libId] || '').trim()
+            });
+          });
+        }
+        renderTasks();
+      } else if (which === 'note') {
+        const text = ui.noteMessage.trim();
+        const title = ui.noteTitle.trim();
+        if (ui.editingNoteId) {
+          const note = state.currentHandover.notes.find(n => n.id === ui.editingNoteId);
+          if (note) { note.text = text; note.title = title; }
+        } else if (text) {
+          state.currentHandover.notes.push({
+            id: nextId(state.currentHandover.notes),
+            author: state.user.initials,
+            avatarColor: state.user.avatarColor,
+            title,
+            text
+          });
+        }
+        renderNotes();
+      } else if (which === 'report') {
+        const inOneOff = ui.activeReportCat === 'Other' || (ui.activeReportCat && ui.oneOffReportMode);
+        if (inOneOff) {
+          state.currentHandover.reports.push({
+            id: nextId(state.currentHandover.reports),
+            category: ui.activeReportCat === 'Other' ? 'Other' : ui.activeReportCat,
+            title: ui.otherReportTitle.trim(),
+            description: ui.otherReportDetails.trim()
+          });
+        } else {
+          ui.selectedReportIds.forEach(libId => {
+            const r = findLibraryReport(libId);
+            if (!r) return;
+            state.currentHandover.reports.push({
+              id: nextId(state.currentHandover.reports),
+              category: r.category,
+              title: r.title,
+              description: (ui.reportDetails[libId] || '').trim()
+            });
+          });
+        }
+        renderReports();
+      }
+
+      setTimeout(() => { btn.style.opacity = ''; closeSheet(); }, 160);
+    }
+
+    /* ===== CLICK ROUTER ===== */
+    document.addEventListener('click', e => {
+      // task checkbox
+      const check = e.target.closest('.check');
+      if (check) {
+        const row = check.closest('.row[data-task-id]');
+        if (row) toggleTask(parseInt(row.dataset.taskId));
+        return;
+      }
+
+      // expand row
+      const chev = e.target.closest('.chev');
+      if (chev) { chev.closest('.row')?.classList.toggle('open'); return; }
+
+      // open sheet
+      const opener = e.target.closest('[data-open-sheet]');
+      if (opener) { openSheet(opener.dataset.openSheet); return; }
+
+      // overlay dismiss
+      if (e.target.id === 'sheet-overlay') { closeSheet(); return; }
+
+      // sheet tab
+      const sheetTab = e.target.closest('.sheet-tab');
+      if (sheetTab) { switchTab(sheetTab.dataset.sheetTab); return; }
+
+      // task category chip
+      const chip = e.target.closest('[data-cat]');
+      if (chip) {
+        const c = chip.dataset.cat;
+        ui.activeCat = ui.activeCat === c ? null : c;
+        ui.oneOffTaskMode = false;
+        renderTaskSheet();
+        return;
+      }
+
+      // report category chip
+      const repChip = e.target.closest('[data-report-cat]');
+      if (repChip) {
+        const c = repChip.dataset.reportCat;
+        ui.activeReportCat = ui.activeReportCat === c ? null : c;
+        ui.oneOffReportMode = false;
+        renderReportSheet();
+        return;
+      }
+
+      // collapsible library category (task)
+      const libCatHead = e.target.closest('[data-lib-cat] .lib-cat-head');
+      if (libCatHead) {
+        const c = libCatHead.closest('[data-lib-cat]').dataset.libCat;
+        if (ui.taskExpandedCats.has(c)) ui.taskExpandedCats.delete(c);
+        else ui.taskExpandedCats.add(c);
+        renderTaskSheet();
+        return;
+      }
+
+      // collapsible library category (report)
+      const repLibCatHead = e.target.closest('[data-rep-lib-cat] .lib-cat-head');
+      if (repLibCatHead) {
+        const c = repLibCatHead.closest('[data-rep-lib-cat]').dataset.repLibCat;
+        if (ui.reportExpandedCats.has(c)) ui.reportExpandedCats.delete(c);
+        else ui.reportExpandedCats.add(c);
+        renderReportSheet();
+        return;
+      }
+
+      // no-results one-off shortcut
+      const noResultsOneoff = e.target.closest('[data-no-results-oneoff]');
+      if (noResultsOneoff) {
+        const kind = noResultsOneoff.dataset.noResultsOneoff;
+        if (kind === 'task') {
+          ui.activeCat = 'Other';
+          ui.searchQuery = '';
+          ui.searchFocused = false;
+          const ts = document.getElementById('task-search'); if (ts) ts.value = '';
+          renderTaskSheet();
+        } else {
+          ui.activeReportCat = 'Other';
+          ui.reportSearchQuery = '';
+          ui.reportSearchFocused = false;
+          const rs = document.getElementById('report-search'); if (rs) rs.value = '';
+          renderReportSheet();
+        }
+        return;
+      }
+
+      // one-off task button
+      if (e.target.closest('[data-task-oneoff]')) {
+        ui.oneOffTaskMode = true;
+        renderTaskSheet();
+        return;
+      }
+      // one-off report button
+      if (e.target.closest('[data-report-oneoff]')) {
+        ui.oneOffReportMode = true;
+        renderReportSheet();
+        return;
+      }
+
+      // task pick-row toggle (ignore clicks inside the inline detail input)
+      const libPick = e.target.closest('[data-lib-id]');
+      if (libPick && !e.target.closest('.pick-row-detail')) {
+        const id = libPick.dataset.libId;
+        if (ui.selectedTaskIds.has(id)) {
+          ui.selectedTaskIds.delete(id);
+          delete ui.taskDetails[id];
+        } else {
+          ui.selectedTaskIds.add(id);
+        }
+        renderTaskSheet();
+        return;
+      }
+
+      // report pick-row toggle
+      const repPick = e.target.closest('[data-rep-id]');
+      if (repPick && !e.target.closest('.pick-row-detail')) {
+        const id = repPick.dataset.repId;
+        if (ui.selectedReportIds.has(id)) {
+          ui.selectedReportIds.delete(id);
+          delete ui.reportDetails[id];
+        } else {
+          ui.selectedReportIds.add(id);
+        }
+        renderReportSheet();
+        return;
+      }
+
+      // edit note
+      const editBtn = e.target.closest('.edit[data-note-id]');
+      if (editBtn) {
+        const id = parseInt(editBtn.dataset.noteId);
+        const note = state.currentHandover.notes.find(n => n.id === id);
+        if (!note) return;
+        ui.editingNoteId = id;
+        ui.noteTitle = note.title || '';
+        ui.noteMessage = note.text || '';
+        openSheet('note');
+        const nt = document.getElementById('note-title');
+        const nm = document.getElementById('note-message');
+        if (nt) nt.value = ui.noteTitle;
+        if (nm) nm.value = ui.noteMessage;
+        updateSubmit();
+        return;
+      }
+
+      // submit
+      const sub = e.target.closest('#sheet-submit');
+      if (sub && !sub.disabled) { submitSheet(); return; }
+    });
+
+    /* ===== FOCUS HANDLERS ===== */
+    document.addEventListener('focusin', e => {
+      if (e.target.id === 'task-search' && !ui.searchFocused) {
+        ui.searchFocused = true;
+        document.getElementById('task-search-wrap')?.classList.add('active');
+        renderTaskSheet();
+      }
+      if (e.target.id === 'report-search' && !ui.reportSearchFocused) {
+        ui.reportSearchFocused = true;
+        document.getElementById('report-search-wrap')?.classList.add('active');
+        renderReportSheet();
+      }
+    });
+
+    document.addEventListener('click', e => {
+      if (e.target.closest('#task-search-back')) {
+        ui.searchFocused = false;
+        ui.searchQuery = '';
+        document.getElementById('task-search-wrap')?.classList.remove('active');
+        const ts = document.getElementById('task-search'); if (ts) { ts.value = ''; ts.blur(); }
+        renderTaskSheet();
+        return;
+      }
+      if (e.target.closest('#report-search-back')) {
+        ui.reportSearchFocused = false;
+        ui.reportSearchQuery = '';
+        document.getElementById('report-search-wrap')?.classList.remove('active');
+        const rs = document.getElementById('report-search'); if (rs) { rs.value = ''; rs.blur(); }
+        renderReportSheet();
+        return;
+      }
+    });
+
+    /* ===== INPUT HANDLERS ===== */
+    document.addEventListener('input', e => {
+      // task search
+      if (e.target.id === 'task-search') { ui.searchQuery = e.target.value; renderTaskSheet(); return; }
+      // report search
+      if (e.target.id === 'report-search') { ui.reportSearchQuery = e.target.value; renderReportSheet(); return; }
+      // inline pick-row detail input — update state WITHOUT re-render (preserves focus)
+      if (e.target.classList && e.target.classList.contains('pick-row-detail')) {
+        const row = e.target.closest('.pick-row');
+        if (!row) return;
+        if (row.dataset.libId) ui.taskDetails[row.dataset.libId] = e.target.value;
+        else if (row.dataset.repId) ui.reportDetails[row.dataset.repId] = e.target.value;
+        return;
+      }
+      // one-off task form
+      if (e.target.id === 'other-title') { ui.otherTaskTitle = e.target.value; updateSubmit(); return; }
+      if (e.target.id === 'other-details') { ui.otherTaskDetails = e.target.value; return; }
+      // one-off report form
+      if (e.target.id === 'other-report-title') { ui.otherReportTitle = e.target.value; updateSubmit(); return; }
+      if (e.target.id === 'other-report-details') { ui.otherReportDetails = e.target.value; return; }
+      // note fields
+      if (e.target.id === 'note-title') { ui.noteTitle = e.target.value; return; }
+      if (e.target.id === 'note-message') { ui.noteMessage = e.target.value; updateSubmit(); return; }
+    });
+
+    /* ===== TASK TOGGLE ===== */
+    function toggleTask(id) {
+      const task = state.currentHandover.tasks.find(t => t.id === id);
+      if (!task) return;
+      const row = document.querySelector(`.row[data-task-id="${id}"]`);
+      if (row) {
+        row.classList.add('removing');
+        setTimeout(() => { task.completed = !task.completed; renderTasks(); }, 180);
+      } else {
+        task.completed = !task.completed; renderTasks();
+      }
+    }
+
+    /* ===== DRAG TO DISMISS ===== */
+    const sheet = document.getElementById('sheet');
+    const handle = document.getElementById('sheet-handle');
+    if (handle && sheet) {
+      let startY = 0, dragging = false, dy = 0;
+      const start = y => { startY = y; dragging = true; sheet.style.transition = 'none'; };
+      const move = y => { if (!dragging) return; dy = Math.max(0, y - startY); sheet.style.transform = `translateY(${dy}px)`; };
+      const end = () => {
+        if (!dragging) return; dragging = false; sheet.style.transition = '';
+        if (dy > 120) { sheet.style.transform = ''; closeSheet(); } else { sheet.style.transform = ''; }
+        dy = 0;
+      };
+      handle.addEventListener('mousedown', e => start(e.clientY));
+      document.addEventListener('mousemove', e => move(e.clientY));
+      document.addEventListener('mouseup', end);
+      handle.addEventListener('touchstart', e => start(e.touches[0].clientY), { passive: true });
+      document.addEventListener('touchmove', e => move(e.touches[0].clientY), { passive: true });
+      document.addEventListener('touchend', end);
+    }
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSheet(); });
+
+    /* ===== SWIPE TO DELETE ===== */
+    (function () {
+      const SNAP = 88;      // delete zone width (px)
+      const THRESHOLD = 60; // how far left to drag before snap-open
+
+      let active = null;    // { row, swipe, startX, startY, base, moved, cancelled }
+
+      function closeAllSwipes(except) {
+        document.querySelectorAll('.row.swipe-open').forEach(r => {
+          if (r === except) return;
+          r.classList.remove('swipe-open');
+          const sw = r.querySelector('.row-swipe');
+          if (sw) sw.style.transform = '';
+        });
+      }
+
+      function deleteRow(row) {
+        const swipe = row.querySelector('.row-swipe');
+        // slide card face out
+        if (swipe) {
+          swipe.style.transition = 'transform 0.2s ease, opacity 0.2s ease';
+          swipe.style.transform = 'translateX(-110%)';
+          swipe.style.opacity = '0';
+        }
+        // collapse height
+        const h = row.getBoundingClientRect().height;
+        row.style.overflow = 'hidden';
+        row.style.maxHeight = h + 'px';
+        row.style.transition = 'max-height 0.25s ease 0.08s, margin-bottom 0.25s ease 0.08s';
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+          row.style.maxHeight = '0';
+          row.style.marginBottom = '0';
+        }));
+        setTimeout(() => {
+          if (row.dataset.taskId) {
+            const id = parseInt(row.dataset.taskId);
+            state.currentHandover.tasks = state.currentHandover.tasks.filter(t => t.id !== id);
+            renderTasks();
+          } else if (row.dataset.noteId) {
+            const id = parseInt(row.dataset.noteId);
+            state.currentHandover.notes = state.currentHandover.notes.filter(n => n.id !== id);
+            renderNotes();
+          } else if (row.dataset.reportId) {
+            const id = parseInt(row.dataset.reportId);
+            state.currentHandover.reports = state.currentHandover.reports.filter(r => r.id !== id);
+            renderReports();
+          }
+        }, 340);
+      }
+
+      function onStart(e) {
+        const row = e.target.closest('.row');
+        if (!row) return;
+        if (e.target.closest('.row-delete-bg')) return;
+        const swipe = row.querySelector('.row-swipe');
+        if (!swipe) return;
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        closeAllSwipes(row);
+        active = {
+          row, swipe,
+          startX: clientX, startY: clientY,
+          base: row.classList.contains('swipe-open') ? -SNAP : 0,
+          moved: false, cancelled: false
+        };
+      }
+
+      function onMove(e) {
+        if (!active || active.cancelled) return;
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        const dx = clientX - active.startX;
+        const dy = clientY - active.startY;
+
+        if (!active.moved) {
+          if (Math.abs(dy) > Math.abs(dx) + 4) { active.cancelled = true; return; }
+          if (Math.abs(dx) < 6) return;
+          active.moved = true;
+        }
+
+        if (e.cancelable) e.preventDefault();
+
+        let tx = active.base + dx;
+        if (tx > 0) tx = 0;
+        if (tx < -SNAP) tx = -(SNAP + (-tx - SNAP) * 0.25); // rubber band
+
+        active.swipe.classList.add('is-dragging');
+        active.swipe.style.transform = `translateX(${tx}px)`;
+      }
+
+      function onEnd() {
+        if (!active) return;
+        const { row, swipe, base, moved, cancelled } = active;
+        active = null;
+        swipe.classList.remove('is-dragging');
+
+        if (!moved || cancelled) {
+          // tap: if row was open, close it; otherwise leave click to propagate
+          if (row.classList.contains('swipe-open')) {
+            row.classList.remove('swipe-open');
+            swipe.style.transform = '';
+          }
+          return;
+        }
+
+        const m = swipe.style.transform.match(/translateX\(([^p]+)px\)/);
+        const tx = m ? parseFloat(m[1]) : base;
+
+        if (tx < -THRESHOLD) {
+          row.classList.add('swipe-open');
+          swipe.style.transform = `translateX(-${SNAP}px)`;
+        } else {
+          row.classList.remove('swipe-open');
+          swipe.style.transform = '';
+        }
+      }
+
+      document.addEventListener('mousedown', onStart);
+      document.addEventListener('mousemove', onMove);
+      document.addEventListener('mouseup', onEnd);
+      document.addEventListener('touchstart', onStart, { passive: true });
+      document.addEventListener('touchmove', onMove, { passive: false });
+      document.addEventListener('touchend', onEnd);
+      document.addEventListener('touchcancel', onEnd);
+
+      // tap the red delete zone → delete
+      document.addEventListener('click', e => {
+        const bg = e.target.closest('.row-delete-bg');
+        if (bg) {
+          const row = bg.closest('.row');
+          if (row) deleteRow(row);
+        }
+      });
+    })();
+
+    /* ===== INIT ===== */
+    document.addEventListener('DOMContentLoaded', () => {
+      renderTasks();
+      renderNotes();
+      renderReports();
+      icons();
+    });
+  })();
+  </script>
+</body>
+</html>
