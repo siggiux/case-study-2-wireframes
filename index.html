@@ -105,7 +105,7 @@
     .section-meta { font: var(--t-sm); color: var(--ink-2); }
 
     /* rows — outer clip container */
-    .row { position: relative; overflow: hidden; border-radius: var(--r-md); margin-bottom: 10px; }
+    .row { position: relative; overflow: hidden; border-radius: var(--r-md); margin-bottom: 10px; transition: opacity 0.45s cubic-bezier(0.4, 0, 0.2, 1); }
     .row:last-child { margin-bottom: 0; }
     #task-list-done { margin-top: 16px; }
 
@@ -127,15 +127,20 @@
       background: #BF3535;
       display: flex; align-items: center; justify-content: center;
       cursor: pointer; border-radius: 0 var(--r-md) var(--r-md) 0;
+      transition: width 0.18s ease, border-radius 0.18s ease;
     }
     .row-delete-bg svg { color: #fff; width: 20px; height: 20px; opacity: 0; transform: scale(0.6) translateX(6px); transition: opacity 0.2s, transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1); }
     .row.swipe-open .row-delete-bg svg { opacity: 1; transform: scale(1) translateX(0); }
+    .row.swipe-will-delete .row-delete-bg { width: 100%; border-radius: var(--r-md); }
+    .row.swipe-will-delete .row-delete-bg svg { opacity: 1; transform: scale(1.1) translateX(0); }
 
     /* row content layout */
     .row-main { display: flex; align-items: center; gap: 12px; }
-    .row .icon { flex-shrink: 0; width: 20px; height: 20px; color: var(--ink-2); display: grid; place-items: center; }
+    .row .icon { flex-shrink: 0; width: 16px; height: 16px; color: var(--ink-2); display: grid; place-items: center; }
+    .row .icon svg { width: 14px; height: 14px; }
     .row-label { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
     .row .label { font: var(--t-body); color: var(--ink); }
+    .row[data-task-id] .label { text-decoration: line-through; text-decoration-color: transparent; transition: color 0.38s ease, text-decoration-color 0.45s ease 0.06s; }
     .row .row-cat { font: 400 11px/1.3 var(--font); color: var(--ink-3); }
     .row .chev { flex-shrink: 0; width: 20px; height: 20px; color: var(--ink-2); transition: transform var(--ease); }
     .row.open .chev { transform: rotate(180deg); }
@@ -148,15 +153,14 @@
       flex-shrink: 0; width: 24px; height: 24px; border-radius: 50%;
       border: 2px solid #3A3A3A; background: transparent;
       display: grid; place-items: center; cursor: pointer;
-      transition: background var(--ease), border-color var(--ease);
+      transition: background 0.32s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.32s cubic-bezier(0.4, 0, 0.2, 1);
     }
     .check:hover { border-color: var(--accent); }
-    .check svg { width: 14px; height: 14px; color: #fff; stroke-width: 3; opacity: 0; transform: scale(0.5); transition: opacity var(--ease), transform var(--ease); }
+    .check svg { width: 14px; height: 14px; color: #fff; stroke-width: 3; opacity: 0; transform: scale(0.3); transition: opacity 0.18s ease, transform 0.48s cubic-bezier(0.34, 1.9, 0.64, 1); }
     .row.done .check { background: var(--accent); border-color: var(--accent); }
     .row.done .check svg { opacity: 1; transform: scale(1); }
-    .row.done .label { text-decoration: line-through; text-decoration-color: var(--strike); color: var(--strike); }
+    .row.done .label { text-decoration-color: var(--strike); color: var(--strike); }
     .row.done { opacity: 0.5; }
-    .row.removing .row-swipe { opacity: 0; transform: scale(0.96); transition: opacity 0.18s, transform 0.18s; }
 
     /* notes */
     .note .row-swipe { flex-direction: row; align-items: flex-start; gap: 4px; padding: 12px 14px; }
@@ -329,6 +333,122 @@
 
     /* category label in search results */
     .pick-row-cat { display: block; font: 400 11px/1.3 var(--font); color: var(--ink-3); margin-top: 1px; }
+
+    /* ===== finish handover — confirmation screen ===== */
+    .confirm-screen {
+      position: absolute; inset: 0;
+      background: var(--bg);
+      transform: translateY(100%);
+      transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 20;
+      display: flex; flex-direction: column;
+      overflow: hidden;
+    }
+    .confirm-screen.open { transform: translateY(0); }
+    .confirm-content {
+      flex: 1;
+      padding: 56px 24px 28px;
+      display: flex; flex-direction: column;
+      overflow-y: auto;
+    }
+    .confirm-intro {
+      font: italic 22px/1.35 var(--font);
+      color: var(--ink-2);
+      text-align: center;
+      margin: 0;
+    }
+    .confirm-section { margin-top: auto; }
+    .confirm-section h2 { font: var(--t-h1); margin: 0 0 14px; }
+    .summary-card {
+      display: flex; align-items: center; gap: 14px;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--r-md);
+      padding: 14px 16px;
+      margin-bottom: 10px;
+    }
+    .summary-card:last-of-type { margin-bottom: 0; }
+    .summary-count {
+      font: 600 17px/1 var(--font);
+      color: var(--ink);
+      min-width: 14px;
+    }
+    .summary-label {
+      flex: 1;
+      font: var(--t-body-m);
+      color: var(--ink);
+    }
+    .summary-add {
+      font: 500 14px/1 var(--font);
+      color: var(--accent);
+      padding: 8px 16px;
+      border-radius: var(--r-sm);
+      background: rgba(26,135,241,0.12);
+      transition: background var(--ease);
+    }
+    .summary-add:hover { background: rgba(26,135,241,0.2); }
+    .confirm-actions { display: flex; gap: 12px; margin-top: 28px; }
+    .btn-back, .btn-finish-shift {
+      flex: 1;
+      padding: 14px 12px;
+      border-radius: 999px;
+      font: 600 15px/1 var(--font);
+      transition: background var(--ease), border-color var(--ease), transform var(--ease);
+      cursor: pointer;
+    }
+    .btn-back { background: transparent; border: 1px solid var(--line); color: var(--ink); }
+    .btn-back:hover { background: var(--surface); border-color: #3A3A3A; }
+    .btn-finish-shift { background: var(--accent); color: #fff; border: 1px solid var(--accent); }
+    .btn-finish-shift:hover { background: #1470CC; }
+    .btn-back:active, .btn-finish-shift:active { transform: scale(0.98); }
+
+    /* ===== shift done screen ===== */
+    .done-screen {
+      position: absolute; inset: 0;
+      background: var(--bg);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+      z-index: 21;
+      display: flex; align-items: center; justify-content: center;
+      padding: 24px;
+    }
+    .done-screen.open { opacity: 1; pointer-events: auto; }
+    .done-content { text-align: center; max-width: 320px; }
+    .done-icon {
+      display: inline-grid; place-items: center;
+      margin-bottom: 24px;
+      color: var(--accent);
+      opacity: 0;
+      transform: scale(0.8);
+      transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+    }
+    .done-screen.open .done-icon { opacity: 1; transform: scale(1); }
+    .done-icon svg { width: 48px; height: 48px; stroke-width: 2; }
+    .done-title {
+      font: 700 28px/1.2 var(--font);
+      color: var(--ink);
+      margin: 0 0 12px;
+      opacity: 0; transform: translateY(6px);
+      transition: opacity 0.3s ease 0.2s, transform 0.3s ease 0.2s;
+    }
+    .done-screen.open .done-title { opacity: 1; transform: translateY(0); }
+    .done-subtitle {
+      font: 400 16px/1.45 var(--font);
+      color: var(--ink-2);
+      margin: 0 0 20px;
+      opacity: 0;
+      transition: opacity 0.3s ease 0.25s;
+    }
+    .done-screen.open .done-subtitle { opacity: 1; }
+    .done-meta {
+      font: 400 13px/1.4 var(--font);
+      color: #888;
+      margin: 0;
+      opacity: 0;
+      transition: opacity 0.3s ease 0.3s;
+    }
+    .done-screen.open .done-meta { opacity: 1; }
   </style>
 </head>
 <body>
@@ -425,6 +545,45 @@
           <span id="sheet-submit-label">Add to handover</span>
           <span class="badge hidden" id="sheet-badge"></span>
         </button>
+      </div>
+    </div>
+
+    <!-- Finish handover — confirmation screen -->
+    <div class="confirm-screen" id="confirm-screen" aria-hidden="true">
+      <div class="confirm-content">
+        <p class="confirm-intro">Ready to hand over?<br>Here's what you're passing on.</p>
+        <div class="confirm-section">
+          <h2>Your handover</h2>
+          <div class="summary-card">
+            <span class="summary-count" id="confirm-tasks-count">0</span>
+            <span class="summary-label">Tasks</span>
+            <button class="summary-add" data-confirm-add="task">Add</button>
+          </div>
+          <div class="summary-card">
+            <span class="summary-count" id="confirm-notes-count">0</span>
+            <span class="summary-label">Notes</span>
+            <button class="summary-add" data-confirm-add="note">Add</button>
+          </div>
+          <div class="summary-card">
+            <span class="summary-count" id="confirm-reports-count">0</span>
+            <span class="summary-label">Report</span>
+            <button class="summary-add" data-confirm-add="report">Add</button>
+          </div>
+        </div>
+        <div class="confirm-actions">
+          <button class="btn-back" id="confirm-back">Back</button>
+          <button class="btn-finish-shift" id="confirm-finish">Finish shift</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Shift done -->
+    <div class="done-screen" id="done-screen" aria-hidden="true">
+      <div class="done-content">
+        <div class="done-icon"><i data-lucide="check-circle-2"></i></div>
+        <h1 class="done-title">Shift done.</h1>
+        <p class="done-subtitle">Your handover has been passed on. Enjoy the rest of your day.</p>
+        <p class="done-meta" id="done-meta"></p>
       </div>
     </div>
   </div>
@@ -545,7 +704,7 @@
 
     /* ===== HELPERS ===== */
     const TASK_ICONS = { Cleaning: 'sparkles', Stock: 'package', Equipment: 'wrench', Prep: 'chef-hat', Admin: 'clipboard-list', Other: 'tag' };
-    const REPORT_ICONS = { Complaints: 'alert-circle', Till: 'receipt', Injury: 'activity', Stock: 'package', Other: 'tag' };
+    const REPORT_ICONS = { Complaints: 'alert-triangle', Till: 'receipt', Injury: 'shield-alert', Stock: 'package', Other: 'tag' };
     const REPORT_NOUN = { Complaints: 'complaint', Till: 'till', Injury: 'injury', Stock: 'stock' };
     const TASK_CATEGORIES = ['Cleaning', 'Stock', 'Equipment', 'Prep', 'Admin', 'Other'];
     const REPORT_CATEGORIES = ['Complaints', 'Till', 'Injury', 'Stock', 'Other'];
@@ -657,7 +816,10 @@
         <div class="row-swipe">
           <div class="row-main">
             <span class="icon"><i data-lucide="${icon}"></i></span>
-            <span class="label">${esc(report.title)}</span>
+            <div class="row-label">
+              <span class="label">${esc(report.title)}</span>
+              <span class="row-cat">${esc(report.category)}</span>
+            </div>
             ${hasDesc ? `<button class="chev" aria-label="Toggle detail"><i data-lucide="chevron-down"></i></button>` : ''}
           </div>
           ${hasDesc ? `<div class="row-detail"><span class="row-detail-text">${esc(report.description)}</span></div>` : ''}
@@ -1358,15 +1520,50 @@
     });
 
     /* ===== TASK TOGGLE ===== */
+    function updateTaskMeta() {
+      const remaining = state.currentHandover.tasks.filter(t => !t.completed).length;
+      const meta = document.getElementById('tasks-meta');
+      if (meta) meta.textContent = `${remaining} unfinished task${remaining !== 1 ? 's' : ''}`;
+      const empty = document.getElementById('tasks-empty');
+      if (empty) empty.classList.toggle('hidden', state.currentHandover.tasks.length > 0);
+    }
+
     function toggleTask(id) {
       const task = state.currentHandover.tasks.find(t => t.id === id);
       if (!task) return;
       const row = document.querySelector(`.row[data-task-id="${id}"]`);
-      if (row) {
-        row.classList.add('removing');
-        setTimeout(() => { task.completed = !task.completed; renderTasks(); }, 180);
+      const activeList = document.getElementById('task-list');
+      const doneList = document.getElementById('task-list-done');
+
+      if (!row || !activeList || !doneList) {
+        task.completed = !task.completed;
+        renderTasks();
+        return;
+      }
+
+      // reset any swipe / expand state
+      row.classList.remove('swipe-open', 'open');
+      const sw = row.querySelector('.row-swipe');
+      if (sw) sw.style.transform = '';
+
+      if (!task.completed) {
+        // animate done state in place, then move to done list
+        row.classList.add('done');
+        setTimeout(() => {
+          task.completed = true;
+          doneList.style.display = '';
+          doneList.appendChild(row);
+          updateTaskMeta();
+        }, 480);
       } else {
-        task.completed = !task.completed; renderTasks();
+        // move back to active list immediately, then animate the reversal
+        task.completed = false;
+        activeList.appendChild(row);
+        if (!doneList.children.length) doneList.style.display = 'none';
+        updateTaskMeta();
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+          row.classList.remove('done');
+        }));
       }
     }
 
@@ -1393,10 +1590,11 @@
 
     /* ===== SWIPE TO DELETE ===== */
     (function () {
-      const SNAP = 88;      // delete zone width (px)
-      const THRESHOLD = 60; // how far left to drag before snap-open
+      const SNAP = 88;           // delete zone width (px)
+      const SNAP_THRESHOLD = 60; // drag past this → snap open
+      const DELETE_RATIO = 0.75; // drag past 75% of card width → auto-delete on release
 
-      let active = null;    // { row, swipe, startX, startY, base, moved, cancelled }
+      let active = null;
 
       function closeAllSwipes(except) {
         document.querySelectorAll('.row.swipe-open').forEach(r => {
@@ -1409,17 +1607,17 @@
 
       function deleteRow(row) {
         const swipe = row.querySelector('.row-swipe');
-        // slide card face out
+        row.classList.remove('swipe-open', 'swipe-will-delete');
         if (swipe) {
-          swipe.style.transition = 'transform 0.2s ease, opacity 0.2s ease';
+          swipe.classList.remove('is-dragging');
+          swipe.style.transition = 'transform 0.2s ease, opacity 0.18s ease';
           swipe.style.transform = 'translateX(-110%)';
           swipe.style.opacity = '0';
         }
-        // collapse height
         const h = row.getBoundingClientRect().height;
         row.style.overflow = 'hidden';
         row.style.maxHeight = h + 'px';
-        row.style.transition = 'max-height 0.25s ease 0.08s, margin-bottom 0.25s ease 0.08s';
+        row.style.transition = 'max-height 0.25s ease 0.1s, margin-bottom 0.25s ease 0.1s';
         requestAnimationFrame(() => requestAnimationFrame(() => {
           row.style.maxHeight = '0';
           row.style.marginBottom = '0';
@@ -1473,10 +1671,21 @@
 
         if (e.cancelable) e.preventDefault();
 
+        const cardW = active.row.offsetWidth;
+        const delThreshold = cardW * DELETE_RATIO;
         let tx = active.base + dx;
         if (tx > 0) tx = 0;
-        if (tx < -SNAP) tx = -(SNAP + (-tx - SNAP) * 0.25); // rubber band
+        if (-tx > delThreshold) {
+          // heavy rubber band past the delete threshold
+          const over = -tx - delThreshold;
+          tx = -(delThreshold + over * 0.18);
+        } else if (-tx > SNAP) {
+          // light resistance between snap-open and delete threshold
+          const over = -tx - SNAP;
+          tx = -(SNAP + over * 0.82);
+        }
 
+        active.row.classList.toggle('swipe-will-delete', -tx >= delThreshold);
         active.swipe.classList.add('is-dragging');
         active.swipe.style.transform = `translateX(${tx}px)`;
       }
@@ -1486,9 +1695,9 @@
         const { row, swipe, base, moved, cancelled } = active;
         active = null;
         swipe.classList.remove('is-dragging');
+        row.classList.remove('swipe-will-delete');
 
         if (!moved || cancelled) {
-          // tap: if row was open, close it; otherwise leave click to propagate
           if (row.classList.contains('swipe-open')) {
             row.classList.remove('swipe-open');
             swipe.style.transform = '';
@@ -1498,8 +1707,11 @@
 
         const m = swipe.style.transform.match(/translateX\(([^p]+)px\)/);
         const tx = m ? parseFloat(m[1]) : base;
+        const cardW = row.offsetWidth;
 
-        if (tx < -THRESHOLD) {
+        if (tx <= -(cardW * DELETE_RATIO)) {
+          deleteRow(row);
+        } else if (tx < -SNAP_THRESHOLD) {
           row.classList.add('swipe-open');
           swipe.style.transform = `translateX(-${SNAP}px)`;
         } else {
@@ -1516,7 +1728,6 @@
       document.addEventListener('touchend', onEnd);
       document.addEventListener('touchcancel', onEnd);
 
-      // tap the red delete zone → delete
       document.addEventListener('click', e => {
         const bg = e.target.closest('.row-delete-bg');
         if (bg) {
@@ -1525,6 +1736,58 @@
         }
       });
     })();
+
+    /* ===== FINISH HANDOVER FLOW ===== */
+    function updateConfirmCounts() {
+      const tasks = state.currentHandover.tasks.filter(t => !t.completed).length;
+      const notes = state.currentHandover.notes.length;
+      const reports = state.currentHandover.reports.length;
+      const tEl = document.getElementById('confirm-tasks-count');
+      const nEl = document.getElementById('confirm-notes-count');
+      const rEl = document.getElementById('confirm-reports-count');
+      if (tEl) tEl.textContent = tasks;
+      if (nEl) nEl.textContent = notes;
+      if (rEl) rEl.textContent = reports;
+    }
+
+    function openConfirmScreen() {
+      updateConfirmCounts();
+      const screen = document.getElementById('confirm-screen');
+      if (screen) { screen.classList.add('open'); screen.setAttribute('aria-hidden', 'false'); }
+    }
+
+    function closeConfirmScreen() {
+      const screen = document.getElementById('confirm-screen');
+      if (screen) { screen.classList.remove('open'); screen.setAttribute('aria-hidden', 'true'); }
+    }
+
+    function showDoneScreen() {
+      const tasks = state.currentHandover.tasks.length;
+      const notes = state.currentHandover.notes.length;
+      const reports = state.currentHandover.reports.length;
+      const meta = document.getElementById('done-meta');
+      if (meta) {
+        meta.textContent =
+          `${tasks} task${tasks !== 1 ? 's' : ''} · ` +
+          `${notes} note${notes !== 1 ? 's' : ''} · ` +
+          `${reports} report${reports !== 1 ? 's' : ''} handed over`;
+      }
+      const screen = document.getElementById('done-screen');
+      if (screen) { screen.classList.add('open'); screen.setAttribute('aria-hidden', 'false'); }
+    }
+
+    document.addEventListener('click', e => {
+      if (e.target.closest('.btn-finish')) { openConfirmScreen(); return; }
+      if (e.target.closest('#confirm-back')) { closeConfirmScreen(); return; }
+      const add = e.target.closest('[data-confirm-add]');
+      if (add) {
+        const kind = add.dataset.confirmAdd;
+        closeConfirmScreen();
+        setTimeout(() => openSheet(kind), 200);
+        return;
+      }
+      if (e.target.closest('#confirm-finish')) { showDoneScreen(); return; }
+    });
 
     /* ===== INIT ===== */
     document.addEventListener('DOMContentLoaded', () => {
