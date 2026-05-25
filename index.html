@@ -9,39 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <style>
-    :root {
-      --bg: #0F0F0F;
-      --card: #1A1A1A;
-      --surface: #242424;
-      --ink: #F0F0F0;
-      --ink-2: #888888;
-      --ink-3: #555555;
-      --line: #2E2E2E;
-      --accent: #1A87F1;
-      --btn-secondary: #2E2E2E;
-      --handle: #3A3A3A;
-      --hint: #666666;
-      --strike: #555555;
-      --avatar-bg: #2A2A4A;
-      --avatar-ink: #A0A0FF;
-      --overlay: rgba(0,0,0,0.6);
-      --shadow-card: 0px 2px 12px rgba(0,0,0,0.4);
-      --shadow-card-hover: 0 8px 20px rgba(0,0,0,0.55);
-      --shadow-fab: 0 6px 16px rgba(0,0,0,0.5);
-      --r-sm: 8px; --r-md: 12px; --r-lg: 16px;
-      --pad: 16px; --gap: 24px;
-      --font: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
-      --t-h1: 700 20px/1.3 var(--font);
-      --t-h2: 700 18px/1.3 var(--font);
-      --t-body: 400 15px/1.45 var(--font);
-      --t-body-m: 500 15px/1.45 var(--font);
-      --t-sm: 400 13px/1.4 var(--font);
-      --t-xs: 500 11px/1.2 var(--font);
-      --ease: 200ms ease;
-      --ease-out: 280ms cubic-bezier(0.16,1,0.3,1);
-      --device-w: 390px;
-      --tabbar-h: 72px;
-    }
+    @import './tokens.css';
     *, *::before, *::after { box-sizing: border-box; }
     html, body { margin: 0; padding: 0; }
     button { font: inherit; color: inherit; background: none; border: none; padding: 0; cursor: pointer; }
@@ -79,8 +47,13 @@
     }
 
     /* header */
-    .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--gap); }
+    .header { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 8px; margin-bottom: var(--gap); }
     .header h1 { margin: 0; font: var(--t-h1); }
+
+    /* hamburger button */
+    .btn-menu { display: grid; place-items: center; width: 36px; height: 36px; border-radius: var(--r-sm); color: var(--ink); transition: background var(--ease), color var(--ease); }
+    .btn-menu:hover { background: var(--surface); }
+    .btn-menu svg { width: 20px; height: 20px; }
     .btn-finish {
       font: 500 13px/1 var(--font); color: #fff; border: none;
       border-radius: var(--r-sm); padding: 9px 13px;
@@ -139,10 +112,12 @@
     .row .icon { flex-shrink: 0; width: 16px; height: 16px; color: var(--ink-2); display: grid; place-items: center; }
     .row .icon svg { width: 14px; height: 14px; }
     .row-label { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+    .row-label-top { display: flex; align-items: center; gap: 4px; }
     .row .label { font: var(--t-body); color: var(--ink); }
     .row[data-task-id] .label { text-decoration: line-through; text-decoration-color: transparent; transition: color 0.38s ease, text-decoration-color 0.45s ease 0.06s; }
     .row .row-cat { font: 400 11px/1.3 var(--font); color: var(--ink-3); }
-    .row .chev { flex-shrink: 0; width: 20px; height: 20px; color: var(--ink-2); transition: transform var(--ease); }
+    .row .chev { flex-shrink: 0; width: 16px; height: 16px; color: var(--ink-3); display: grid; place-items: center; transition: transform var(--ease); }
+    .row .chev svg { width: 14px; height: 14px; }
     .row.open .chev { transform: rotate(180deg); }
     .row-detail { display: none; padding: 8px 4px 4px 56px; align-items: flex-start; gap: 8px; }
     .row.open .row-detail { display: flex; }
@@ -151,7 +126,7 @@
     /* checkbox */
     .check {
       flex-shrink: 0; width: 24px; height: 24px; border-radius: 50%;
-      border: 2px solid #3A3A3A; background: transparent;
+      border: 2px solid var(--handle); background: transparent;
       display: grid; place-items: center; cursor: pointer;
       transition: background 0.32s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.32s cubic-bezier(0.4, 0, 0.2, 1);
     }
@@ -256,7 +231,7 @@
     .pick-row:hover { background: #2A2A2A; }
     .pick-row.selected { border-color: var(--accent); background: rgba(26,135,241,0.12); }
     .pick-row-main { display: flex; align-items: center; gap: 12px; width: 100%; }
-    .pick-row .radio { width: 20px; height: 20px; border-radius: 50%; border: 2px solid #3A3A3A; flex-shrink: 0; display: grid; place-items: center; transition: border-color var(--ease); }
+    .pick-row .radio { width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--handle); flex-shrink: 0; display: grid; place-items: center; transition: border-color var(--ease); }
     .pick-row .radio::after { content: ''; width: 10px; height: 10px; border-radius: 50%; background: var(--accent); transform: scale(0); transition: transform var(--ease); }
     .pick-row.selected .radio { border-color: var(--accent); }
     .pick-row.selected .radio::after { transform: scale(1); }
@@ -443,18 +418,107 @@
     .done-screen.open .done-subtitle { opacity: 1; }
     .done-meta {
       font: 400 13px/1.4 var(--font);
-      color: #888;
+      color: var(--ink-2);
       margin: 0;
       opacity: 0;
       transition: opacity 0.3s ease 0.3s;
     }
     .done-screen.open .done-meta { opacity: 1; }
+
+    /* ── menu drawer ── */
+    .menu-overlay {
+      position: absolute; inset: 0; background: var(--overlay);
+      opacity: 0; pointer-events: none;
+      transition: opacity var(--ease-out); z-index: 30;
+    }
+    .menu-overlay.open { opacity: 1; pointer-events: auto; }
+
+    .menu-drawer {
+      position: absolute; top: 0; left: 0; bottom: 0; width: 272px;
+      background: var(--card); z-index: 31;
+      transform: translateX(-100%);
+      transition: transform var(--ease-out);
+      display: flex; flex-direction: column;
+      border-radius: 0 var(--r-lg) var(--r-lg) 0;
+    }
+    .menu-drawer.open { transform: translateX(0); }
+
+    .menu-header {
+      display: flex; align-items: center; gap: 12px;
+      padding: 24px 16px 16px;
+      border-bottom: 1px solid var(--line);
+    }
+    .menu-avatar {
+      width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0;
+      background: var(--avatar-bg); color: var(--avatar-ink);
+      display: grid; place-items: center; font: 600 13px/1 var(--font);
+    }
+    .menu-user-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+    .menu-user-name { font: 600 15px/1.2 var(--font); color: var(--ink); }
+    .menu-user-role { font: 400 12px/1.2 var(--font); color: var(--ink-2); }
+    .menu-close {
+      flex-shrink: 0; display: grid; place-items: center;
+      width: 32px; height: 32px; border-radius: var(--r-sm);
+      color: var(--ink-2); transition: background var(--ease), color var(--ease);
+    }
+    .menu-close:hover { background: var(--surface); color: var(--ink); }
+    .menu-close svg { width: 18px; height: 18px; }
+
+    .menu-body { flex: 1; padding: 20px 16px; overflow-y: auto; }
+    .menu-section-title {
+      font: 600 11px/1.2 var(--font); color: var(--ink-3);
+      text-transform: uppercase; letter-spacing: 0.07em;
+      margin: 0 0 10px;
+    }
+
+    /* theme toggle — segmented control */
+    .theme-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .theme-row-label { font: var(--t-body-m); color: var(--ink); }
+    .theme-seg {
+      display: flex; align-items: center; gap: 2px;
+      background: var(--surface); border: 1px solid var(--line);
+      border-radius: 999px; padding: 3px;
+    }
+    .theme-opt {
+      display: flex; align-items: center; gap: 5px;
+      padding: 6px 12px; border-radius: 999px;
+      font: 500 13px/1 var(--font); color: var(--ink-3);
+      transition: background var(--ease), color var(--ease), box-shadow var(--ease);
+      cursor: pointer;
+    }
+    .theme-opt svg { width: 13px; height: 13px; flex-shrink: 0; }
+    .theme-opt.active {
+      background: var(--bg); color: var(--ink);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.18);
+    }
+
+    /* ── smooth theme transition ── */
+    .theme-changing, .theme-changing * {
+      transition:
+        background-color 0.28s ease,
+        color 0.28s ease,
+        border-color 0.28s ease,
+        box-shadow 0.28s ease !important;
+    }
+
+    /* ── light-mode overrides for hardcoded dark values ── */
+    html.light body { background: #DEDEDE; }
+    html.light .check { border-color: var(--color-neutral-400); }
+    html.light .pick-row .radio { border-color: var(--color-neutral-400); }
+    html.light .btn-add:hover { background: var(--color-neutral-200); }
+    html.light .pick-row:hover { background: var(--color-neutral-200); }
+    html.light .lib-cat-head:hover { background: var(--color-neutral-200); }
+    html.light .chip:hover { border-color: var(--color-neutral-400); }
+    html.light .btn-back:hover { border-color: var(--color-neutral-400); }
   </style>
 </head>
 <body>
   <div class="device" id="device">
     <main class="scroll">
       <header class="header">
+        <button class="btn-menu" id="btn-menu" aria-label="Open menu" aria-expanded="false" aria-controls="menu-drawer">
+          <i data-lucide="menu"></i>
+        </button>
         <h1>Your handover</h1>
         <button class="btn-finish pulse" type="button">Finish handover</button>
       </header>
@@ -573,6 +637,37 @@
         <div class="confirm-actions">
           <button class="btn-back" id="confirm-back">Back</button>
           <button class="btn-finish-shift" id="confirm-finish">Finish shift</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Menu overlay + drawer -->
+    <div class="menu-overlay" id="menu-overlay" aria-hidden="true"></div>
+    <div class="menu-drawer" id="menu-drawer" role="dialog" aria-modal="true" aria-label="Menu" aria-hidden="true">
+      <div class="menu-header">
+        <div class="menu-avatar" id="menu-avatar">MK</div>
+        <div class="menu-user-info">
+          <span class="menu-user-name" id="menu-user-name">Maria Kowalski</span>
+          <span class="menu-user-role">Morning shift · Barista</span>
+        </div>
+        <button class="menu-close" id="menu-close" aria-label="Close menu">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      <div class="menu-body">
+        <p class="menu-section-title">Appearance</p>
+        <div class="theme-row">
+          <span class="theme-row-label">Theme</span>
+          <div class="theme-seg" id="theme-seg">
+            <button class="theme-opt active" data-theme="dark" aria-label="Dark mode">
+              <i data-lucide="moon"></i>
+              <span>Dark</span>
+            </button>
+            <button class="theme-opt" data-theme="light" aria-label="Light mode">
+              <i data-lucide="sun"></i>
+              <span>Light</span>
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -778,10 +873,12 @@
             </button>
             <span class="icon"><i data-lucide="${icon}"></i></span>
             <div class="row-label">
-              <span class="label">${esc(task.title)}</span>
+              <div class="row-label-top">
+                <span class="label">${esc(task.title)}</span>
+                ${hasDesc ? `<button class="chev" aria-label="Toggle detail"><i data-lucide="chevron-down"></i></button>` : ''}
+              </div>
               <span class="row-cat">${esc(task.category)}</span>
             </div>
-            ${hasDesc ? `<button class="chev" aria-label="Toggle detail"><i data-lucide="chevron-down"></i></button>` : ''}
           </div>
           ${hasDesc ? `<div class="row-detail"><span class="row-detail-text">${esc(task.description)}</span></div>` : ''}
         </div>`;
@@ -817,10 +914,12 @@
           <div class="row-main">
             <span class="icon"><i data-lucide="${icon}"></i></span>
             <div class="row-label">
-              <span class="label">${esc(report.title)}</span>
+              <div class="row-label-top">
+                <span class="label">${esc(report.title)}</span>
+                ${hasDesc ? `<button class="chev" aria-label="Toggle detail"><i data-lucide="chevron-down"></i></button>` : ''}
+              </div>
               <span class="row-cat">${esc(report.category)}</span>
             </div>
-            ${hasDesc ? `<button class="chev" aria-label="Toggle detail"><i data-lucide="chevron-down"></i></button>` : ''}
           </div>
           ${hasDesc ? `<div class="row-detail"><span class="row-detail-text">${esc(report.description)}</span></div>` : ''}
         </div>`;
@@ -1788,6 +1887,72 @@
       }
       if (e.target.closest('#confirm-finish')) { showDoneScreen(); return; }
     });
+
+    /* ===== MENU DRAWER ===== */
+    (function () {
+      const overlay = document.getElementById('menu-overlay');
+      const drawer  = document.getElementById('menu-drawer');
+      const btnOpen = document.getElementById('btn-menu');
+      const btnClose = document.getElementById('menu-close');
+
+      function openMenu() {
+        overlay.classList.add('open');
+        drawer.classList.add('open');
+        overlay.setAttribute('aria-hidden', 'false');
+        drawer.setAttribute('aria-hidden', 'false');
+        btnOpen && btnOpen.setAttribute('aria-expanded', 'true');
+        icons();
+      }
+
+      function closeMenu() {
+        overlay.classList.remove('open');
+        drawer.classList.remove('open');
+        overlay.setAttribute('aria-hidden', 'true');
+        drawer.setAttribute('aria-hidden', 'true');
+        btnOpen && btnOpen.setAttribute('aria-expanded', 'false');
+      }
+
+      btnOpen  && btnOpen.addEventListener('click',  openMenu);
+      btnClose && btnClose.addEventListener('click', closeMenu);
+      overlay  && overlay.addEventListener('click',  closeMenu);
+    })();
+
+    /* ===== THEME TOGGLE ===== */
+    (function () {
+      const STORAGE_KEY = 'relay-theme';
+
+      function applyTheme(theme, animate) {
+        const html = document.documentElement;
+        if (animate) {
+          html.classList.add('theme-changing');
+          setTimeout(() => html.classList.remove('theme-changing'), 320);
+        }
+        html.classList.toggle('light', theme === 'light');
+
+        // update meta theme-color
+        const metaColor = document.querySelector('meta[name="theme-color"]');
+        if (metaColor) metaColor.content = theme === 'light' ? '#F0F0F0' : '#0F0F0F';
+
+        // sync segmented control
+        document.querySelectorAll('.theme-opt').forEach(btn => {
+          btn.classList.toggle('active', btn.dataset.theme === theme);
+        });
+
+        try { localStorage.setItem(STORAGE_KEY, theme); } catch (_) {}
+      }
+
+      // init from localStorage
+      const saved = (() => { try { return localStorage.getItem(STORAGE_KEY); } catch (_) { return null; } })();
+      applyTheme(saved === 'light' ? 'light' : 'dark', false);
+
+      // theme-opt clicks
+      document.addEventListener('click', e => {
+        const opt = e.target.closest('.theme-opt');
+        if (opt && opt.dataset.theme) {
+          applyTheme(opt.dataset.theme, true);
+        }
+      });
+    })();
 
     /* ===== INIT ===== */
     document.addEventListener('DOMContentLoaded', () => {

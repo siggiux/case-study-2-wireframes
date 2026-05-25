@@ -1,0 +1,187 @@
+/* ════════════════════════════════════════════════════════════════
+   tokens.css — Relay design tokens
+   Two layers: primitives (raw values) → semantics (named roles)
+   ════════════════════════════════════════════════════════════════ */
+
+
+/* ────────────────────────────────────────────────────────────────
+   LAYER 1 — PRIMITIVE TOKENS
+   Raw named values with no semantic meaning attached.
+   Reference these only from the semantic layer below — never
+   directly in component styles.
+   ──────────────────────────────────────────────────────────────── */
+
+:root {
+
+  /* Color — greyscale palette (dark-mode scale; 950 = darkest) */
+  --color-neutral-950: #0F0F0F;
+  --color-neutral-900: #1A1A1A;
+  --color-neutral-800: #242424;
+  --color-neutral-700: #2E2E2E;
+  --color-neutral-600: #3A3A3A;
+  --color-neutral-500: #555555;
+  --color-neutral-450: #666666;
+  --color-neutral-400: #888888;
+  --color-neutral-50:  #F0F0F0;
+  --color-neutral-100: #E8E8E8;
+  --color-neutral-150: #D4D4D4;
+  --color-neutral-200: #BFBFBF;
+
+  /* Color — blue */
+  --color-blue-400: #4DA3F5;
+  --color-blue-500: #1A87F1;
+  --color-blue-600: #1268C4;
+
+  /* Color — indigo (avatar background / text pair) */
+  --color-indigo-900: #2A2A4A;
+  --color-indigo-300: #A0A0FF;
+
+  /* Color — red (destructive actions) */
+  --color-red-600: #BF3535;
+
+  /* Spacing — 4 px base unit */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+
+  /* Border radius */
+  --radius-sm:   8px;
+  --radius-md:   12px;
+  --radius-lg:   16px;
+  --radius-full: 999px;
+
+  /* Typography — font family */
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+
+  /* Typography — size scale */
+  --font-size-xs:   11px;
+  --font-size-sm:   13px;
+  --font-size-base: 15px;
+  --font-size-md:   18px;
+  --font-size-lg:   20px;
+
+  /* Motion — duration */
+  --duration-fast: 200ms;
+  --duration-base: 280ms;
+
+  /* Motion — easing curves */
+  --easing-standard:   ease;
+  --easing-decelerate: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Elevation — raw shadow values */
+  --shadow-sm: 0px 2px 12px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 8px 20px rgba(0, 0, 0, 0.55);
+  --shadow-lg: 0 6px 16px rgba(0, 0, 0, 0.5);
+}
+
+
+/* ────────────────────────────────────────────────────────────────
+   LAYER 2 — SEMANTIC TOKENS
+   Purpose-driven aliases that reference primitives.
+   Use these throughout all component styles.
+   ──────────────────────────────────────────────────────────────── */
+
+:root {
+
+  /* Backgrounds */
+  --bg:      var(--color-neutral-950); /* page and screen background */
+  --card:    var(--color-neutral-900); /* section and panel surfaces */
+  --surface: var(--color-neutral-800); /* row, input, and chip surfaces */
+
+  /* Borders and chrome */
+  --line:          var(--color-neutral-700); /* dividers and input borders */
+  --handle:        var(--color-neutral-600); /* drag handle, checkbox ring */
+  --btn-secondary: var(--color-neutral-700); /* secondary button fill */
+
+  /* Text */
+  --ink:    var(--color-neutral-50);   /* primary — headings and body copy */
+  --ink-2:  var(--color-neutral-400);  /* secondary — labels and metadata */
+  --ink-3:  var(--color-neutral-500);  /* tertiary — disabled and placeholders */
+  --hint:   var(--color-neutral-450);  /* helper and placeholder text */
+  --strike: var(--color-neutral-500);  /* completed-task strikethrough colour */
+
+  /* Brand and interactive */
+  --accent:         var(--color-blue-500);
+  --accent-hover:   var(--color-blue-400);
+  --accent-pressed: var(--color-blue-600);
+
+  /* Avatar */
+  --avatar-bg:  var(--color-indigo-900);
+  --avatar-ink: var(--color-indigo-300);
+
+  /* Overlay */
+  --overlay: rgba(0, 0, 0, 0.6);
+
+  /* Elevation */
+  --shadow-card:       var(--shadow-sm);
+  --shadow-card-hover: var(--shadow-md);
+  --shadow-fab:        var(--shadow-lg);
+
+  /* Border radius aliases */
+  --r-sm: var(--radius-sm);
+  --r-md: var(--radius-md);
+  --r-lg: var(--radius-lg);
+
+  /* Layout */
+  --pad: var(--space-4);
+  --gap: var(--space-6);
+
+  /* Typography — font stack alias */
+  --font: var(--font-sans);
+
+  /* Typography — composite shorthands (weight size/line-height family) */
+  --t-h1:     700 var(--font-size-lg)/1.3    var(--font);
+  --t-h2:     700 var(--font-size-md)/1.3    var(--font);
+  --t-body:   400 var(--font-size-base)/1.45 var(--font);
+  --t-body-m: 500 var(--font-size-base)/1.45 var(--font);
+  --t-sm:     400 var(--font-size-sm)/1.4    var(--font);
+  --t-xs:     500 var(--font-size-xs)/1.2    var(--font);
+
+  /* Motion */
+  --ease:     var(--duration-fast) var(--easing-standard);
+  --ease-out: var(--duration-base) var(--easing-decelerate);
+
+  /* Device dimensions */
+  --device-w: 390px;
+  --tabbar-h: 72px;
+}
+
+
+/* ────────────────────────────────────────────────────────────────
+   LIGHT MODE — semantic overrides
+   Applied when the .light class is present on the <html> element.
+   Only roles that flip between modes are redefined here.
+   Brand / avatar tokens stay constant across modes.
+   ──────────────────────────────────────────────────────────────── */
+
+.light {
+
+  /* Backgrounds */
+  --bg:      var(--color-neutral-50);
+  --card:    var(--color-neutral-100);
+  --surface: var(--color-neutral-150);
+
+  /* Borders and chrome */
+  --line:          var(--color-neutral-200);
+  --handle:        var(--color-neutral-150);
+  --btn-secondary: var(--color-neutral-200);
+
+  /* Text */
+  --ink:    var(--color-neutral-950);
+  --ink-2:  var(--color-neutral-500);
+  --ink-3:  var(--color-neutral-450);
+  --hint:   var(--color-neutral-400);
+  --strike: var(--color-neutral-400);
+
+  /* Elevation — shadows need to be lighter in light mode */
+  --shadow-card:       0px 2px 12px rgba(0, 0, 0, 0.08);
+  --shadow-card-hover: 0 8px 20px rgba(0, 0, 0, 0.14);
+  --shadow-fab:        0 6px 16px rgba(0, 0, 0, 0.12);
+
+  /* Overlay */
+  --overlay: rgba(0, 0, 0, 0.4);
+
+}
