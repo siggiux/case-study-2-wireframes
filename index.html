@@ -89,7 +89,7 @@
       border-radius: var(--r-md); padding: 12px 14px;
       display: flex; flex-direction: column;
       will-change: transform;
-      transition: transform 0.42s cubic-bezier(0.34, 1.15, 0.64, 1);
+      transition: transform 0.42s cubic-bezier(0.34, 1.15, 0.64, 1), border-color var(--ease);
       user-select: none; -webkit-user-select: none;
     }
     .row-swipe.is-dragging { transition: none; }
@@ -119,8 +119,19 @@
     .row .chev { flex-shrink: 0; width: 16px; height: 16px; color: var(--ink-3); display: grid; place-items: center; transition: transform var(--ease); }
     .row .chev svg { width: 14px; height: 14px; }
     .row.open .chev { transform: rotate(180deg); }
+    .row[data-report-id] .row-main > .chev,
+    .row[data-task-id] .row-main > .chev { margin-left: auto; }
+    .row[data-expandable].open .row-swipe { border-color: var(--ink-3); }
     .row-detail { display: none; padding: 8px 4px 4px 56px; align-items: flex-start; gap: 8px; }
     .row.open .row-detail { display: flex; }
+    .row-detail-input {
+      flex: 1; padding: 8px 10px;
+      border: 1px solid var(--line); border-radius: var(--r-sm);
+      background: var(--bg); color: var(--ink); font: var(--t-sm);
+      outline: none; transition: border-color var(--ease);
+    }
+    .row-detail-input::placeholder { color: var(--ink-3); }
+    .row-detail-input:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(26,135,241,0.18); }
     .row-detail-text { flex: 1; font: var(--t-sm); color: var(--ink-2); line-height: 1.5; }
 
     /* checkbox */
@@ -424,6 +435,21 @@
       transition: opacity 0.3s ease 0.3s;
     }
     .done-screen.open .done-meta { opacity: 1; }
+    .btn-new-handover {
+      margin-top: 32px;
+      padding: 14px 28px;
+      border-radius: 999px;
+      background: transparent;
+      border: 1px solid var(--line);
+      color: var(--ink);
+      font: 600 15px/1 var(--font);
+      transition: background var(--ease), border-color var(--ease), transform var(--ease);
+      opacity: 0;
+      transition: opacity 0.3s ease 0.4s, background var(--ease), border-color var(--ease), transform var(--ease);
+    }
+    .done-screen.open .btn-new-handover { opacity: 1; }
+    .btn-new-handover:hover { background: var(--surface); border-color: var(--handle); }
+    .btn-new-handover:active { transform: scale(0.97); }
 
     /* ── menu drawer ── */
     .menu-overlay {
@@ -679,6 +705,7 @@
         <h1 class="done-title">Shift done.</h1>
         <p class="done-subtitle">Your handover has been passed on. Enjoy the rest of your day.</p>
         <p class="done-meta" id="done-meta"></p>
+        <button class="btn-new-handover" id="btn-new-handover">Start new handover</button>
       </div>
     </div>
   </div>
@@ -693,18 +720,13 @@
       user: { name: 'Maria Kowalski', initials: 'MK', avatarColor: '#2A2A4A' },
       currentHandover: {
         tasks: [
-          { id: 1, title: 'Clean espresso machine', category: 'Cleaning', completed: false, description: 'Use the cleaning tablets from the supply cupboard. Run two cycles.' },
+          { id: 1, title: 'Clean espresso machine', category: 'Cleaning', completed: false, description: '' },
           { id: 2, title: 'Restock oat milk', category: 'Stock', completed: false, description: '' },
           { id: 3, title: 'Wipe down counter', category: 'Cleaning', completed: false, description: '' },
           { id: 4, title: 'Mop floor behind counter', category: 'Cleaning', completed: true, description: '' }
         ],
-        notes: [
-          { id: 1, author: 'MK', avatarColor: '#2A2A4A', title: '', text: 'Guy coming back at 17:00 to pay for his americano — he had a large one' },
-          { id: 2, author: 'MK', avatarColor: '#2A2A4A', title: '', text: 'Oat milk delivery arrived, extra 4 cartons in the back cupboard' }
-        ],
-        reports: [
-          { id: 1, category: 'Complaints', title: 'Customer waited too long', description: 'Busy lunch period, queue out the door' }
-        ]
+        notes: [],
+        reports: []
       },
       taskLibrary: {
         Cleaning: [
@@ -864,6 +886,7 @@
       li.dataset.taskId = task.id;
       const icon = taskIcon(task.category);
       const hasDesc = !!task.description;
+      if (!hasDesc) li.dataset.expandable = 'true';
       li.innerHTML = `
         <div class="row-delete-bg"><i data-lucide="trash-2"></i></div>
         <div class="row-swipe">
@@ -875,12 +898,14 @@
             <div class="row-label">
               <div class="row-label-top">
                 <span class="label">${esc(task.title)}</span>
-                ${hasDesc ? `<button class="chev" aria-label="Toggle detail"><i data-lucide="chevron-down"></i></button>` : ''}
               </div>
               <span class="row-cat">${esc(task.category)}</span>
             </div>
+            ${hasDesc ? `<button class="chev" aria-label="Toggle detail"><i data-lucide="chevron-down"></i></button>` : ''}
           </div>
-          ${hasDesc ? `<div class="row-detail"><span class="row-detail-text">${esc(task.description)}</span></div>` : ''}
+          ${hasDesc
+            ? `<div class="row-detail"><span class="row-detail-text">${esc(task.description)}</span></div>`
+            : `<div class="row-detail"><input class="row-detail-input" type="text" placeholder="Add details (optional)" data-detail-task-id="${task.id}" value="${esc(task.description)}" /></div>`}
         </div>`;
       return li;
     }
@@ -908,6 +933,7 @@
       li.dataset.reportId = report.id;
       const icon = reportIcon(report.category);
       const hasDesc = !!report.description;
+      if (!hasDesc) li.dataset.expandable = 'true';
       li.innerHTML = `
         <div class="row-delete-bg"><i data-lucide="trash-2"></i></div>
         <div class="row-swipe">
@@ -916,12 +942,14 @@
             <div class="row-label">
               <div class="row-label-top">
                 <span class="label">${esc(report.title)}</span>
-                ${hasDesc ? `<button class="chev" aria-label="Toggle detail"><i data-lucide="chevron-down"></i></button>` : ''}
               </div>
               <span class="row-cat">${esc(report.category)}</span>
             </div>
+            ${hasDesc ? `<button class="chev" aria-label="Toggle detail"><i data-lucide="chevron-down"></i></button>` : ''}
           </div>
-          ${hasDesc ? `<div class="row-detail"><span class="row-detail-text">${esc(report.description)}</span></div>` : ''}
+          ${hasDesc
+            ? `<div class="row-detail"><span class="row-detail-text">${esc(report.description)}</span></div>`
+            : `<div class="row-detail"><input class="row-detail-input" type="text" placeholder="Add details (optional)" data-detail-report-id="${report.id}" value="${esc(report.description)}" /></div>`}
         </div>`;
       return li;
     }
@@ -1421,9 +1449,21 @@
         return;
       }
 
-      // expand row
+      // expand row (chevron — tasks/reports with description)
       const chev = e.target.closest('.chev');
       if (chev) { chev.closest('.row')?.classList.toggle('open'); return; }
+
+      // expand row (card tap — tasks without description)
+      const expandable = e.target.closest('.row[data-expandable]');
+      if (expandable && !e.target.closest('.check') && !e.target.closest('.row-delete-bg') && !e.target.closest('.row-detail-input')) {
+        document.querySelectorAll('.row[data-expandable].open').forEach(r => { if (r !== expandable) r.classList.remove('open'); });
+        expandable.classList.toggle('open');
+        if (expandable.classList.contains('open')) {
+          const inp = expandable.querySelector('.row-detail-input');
+          if (inp) setTimeout(() => inp.focus(), 50);
+        }
+        return;
+      }
 
       // open sheet
       const opener = e.target.closest('[data-open-sheet]');
@@ -1607,6 +1647,20 @@
         else if (row.dataset.repId) ui.reportDetails[row.dataset.repId] = e.target.value;
         return;
       }
+      // inline task/report detail input on main screen
+      if (e.target.classList.contains('row-detail-input')) {
+        const taskId = parseInt(e.target.dataset.detailTaskId);
+        const reportId = parseInt(e.target.dataset.detailReportId);
+        if (taskId) {
+          const t = state.currentHandover.tasks.find(t => t.id === taskId);
+          if (t) t.description = e.target.value;
+        } else if (reportId) {
+          const r = state.currentHandover.reports.find(r => r.id === reportId);
+          if (r) r.description = e.target.value;
+        }
+        return;
+      }
+
       // one-off task form
       if (e.target.id === 'other-title') { ui.otherTaskTitle = e.target.value; updateSubmit(); return; }
       if (e.target.id === 'other-details') { ui.otherTaskDetails = e.target.value; return; }
@@ -1886,6 +1940,48 @@
         return;
       }
       if (e.target.closest('#confirm-finish')) { showDoneScreen(); return; }
+
+      if (e.target.closest('#btn-new-handover')) {
+        // wipe handover data
+        state.currentHandover.tasks   = [];
+        state.currentHandover.notes   = [];
+        state.currentHandover.reports = [];
+
+        // close both overlay screens
+        const doneScreen    = document.getElementById('done-screen');
+        const confirmScreen = document.getElementById('confirm-screen');
+        doneScreen.classList.remove('open');
+        doneScreen.setAttribute('aria-hidden', 'true');
+        confirmScreen.classList.remove('open');
+        confirmScreen.setAttribute('aria-hidden', 'true');
+
+        // re-render and scroll to top
+        renderTasks();
+        renderNotes();
+        renderReports();
+        document.querySelector('.scroll').scrollTop = 0;
+        return;
+      }
+    });
+
+    /* ===== INLINE TASK / REPORT DETAIL — SAVE ON BLUR ===== */
+    document.addEventListener('focusout', e => {
+      if (!e.target.classList.contains('row-detail-input')) return;
+      const row = e.target.closest('.row[data-expandable]');
+      if (!row || row.contains(e.relatedTarget)) return;
+      row.classList.remove('open');
+      const taskId   = parseInt(e.target.dataset.detailTaskId);
+      const reportId = parseInt(e.target.dataset.detailReportId);
+      // defer so the click handler (if any) runs first before we rebuild the DOM
+      setTimeout(() => {
+        if (taskId) {
+          const t = state.currentHandover.tasks.find(t => t.id === taskId);
+          if (t && t.description.trim()) renderTasks();
+        } else if (reportId) {
+          const r = state.currentHandover.reports.find(r => r.id === reportId);
+          if (r && r.description.trim()) renderReports();
+        }
+      }, 0);
     });
 
     /* ===== MENU DRAWER ===== */
