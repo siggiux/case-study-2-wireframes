@@ -111,6 +111,10 @@
   --shadow-finish: 0 4px 14px rgba(77, 91, 227, 0.30);
   --shadow-seg:   0 1px 3px rgba(43, 38, 34, 0.12);
 
+  /* --- Blur scale --- */
+  --blur-sm: 10px;   /* glass / frosted panels */
+  --blur-md: 24px;   /* heavy frosted overlays  */
+
   /* --- Motion --- */
   --duration-fast: 150ms;
   --duration-base: 280ms;
@@ -353,6 +357,7 @@
 
   /* --- Tab bar --- */
   --tabbar-bg:               rgba(250, 251, 254, 0.45);  /* near-white semi-transparent */
+  --tabbar-blur:             var(--blur-sm);             /* glass effect — Figma GLASS radius 10 */
   --tabbar-shadow:           var(--shadow-float);
   --tab-icon-inactive:       var(--color-text-subdued);  /* #444342 — mid-tone neutral */
   --tab-label-inactive:      var(--color-text-subdued);

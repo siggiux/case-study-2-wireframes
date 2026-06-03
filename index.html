@@ -262,6 +262,9 @@
     }
     .tabbar {
       background: var(--tabbar-bg);
+      -webkit-backdrop-filter: blur(var(--tabbar-blur));
+      backdrop-filter: blur(var(--tabbar-blur));
+      overflow: hidden; /* clip blur to pill shape */
       border-radius: var(--radius-pill);
       display: flex; align-items: center; justify-content: space-between;
       padding: 10px 14px; box-shadow: var(--tabbar-shadow);
