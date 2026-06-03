@@ -1,187 +1,443 @@
-/* ════════════════════════════════════════════════════════════════
-   tokens.css — Relay design tokens
-   Two layers: primitives (raw values) → semantics (named roles)
-   ════════════════════════════════════════════════════════════════ */
+/* ============================================
+   RELAY DESIGN SYSTEM — tokens.css
+   Three-tier token architecture:
+   1. Primitives — raw values, theme-agnostic
+   2. Semantic — meaning, theme-aware (light/dark)
+   3. Component — component-specific, point to semantic
+   ============================================ */
 
 
-/* ────────────────────────────────────────────────────────────────
-   LAYER 1 — PRIMITIVE TOKENS
-   Raw named values with no semantic meaning attached.
-   Reference these only from the semantic layer below — never
-   directly in component styles.
-   ──────────────────────────────────────────────────────────────── */
-
+/* ============================================
+   1. PRIMITIVE TOKENS
+   Raw values. Never reference other tokens.
+   Never used directly in components.
+   ============================================ */
 :root {
 
-  /* Color — greyscale palette (dark-mode scale; 950 = darkest) */
-  --color-neutral-950: #0F0F0F;
-  --color-neutral-900: #1A1A1A;
-  --color-neutral-800: #242424;
-  --color-neutral-700: #2E2E2E;
-  --color-neutral-600: #3A3A3A;
-  --color-neutral-500: #555555;
-  --color-neutral-450: #666666;
-  --color-neutral-400: #888888;
-  --color-neutral-50:  #F0F0F0;
-  --color-neutral-100: #E8E8E8;
-  --color-neutral-150: #D4D4D4;
-  --color-neutral-200: #BFBFBF;
+  /* --- Color: Warm (background family) --- */
+  --warm-25:  #FFFCF8;
+  --warm-40:  #FCF0E2;
+  --warm-50:  #FBF4EC;
+  --warm-75:  #FAE3C8;
+  --warm-100: #F6E2CD;
+  --warm-200: #F3D9BE;
+  --warm-300: #EFCBA6;
 
-  /* Color — blue */
-  --color-blue-400: #4DA3F5;
-  --color-blue-500: #1A87F1;
-  --color-blue-600: #1268C4;
+  /* --- Color: Blue (accent family) --- */
+  --blue-50:  #E8EAFC;
+  --blue-100: #D5D9F8;
+  --blue-200: #B0B7F0;
+  --blue-400: #6470E8;
+  --blue-500: #4D5BE3;
+  --blue-600: #3A45B0;
+  --blue-700: #2C357F;
 
-  /* Color — indigo (avatar background / text pair) */
-  --color-indigo-900: #2A2A4A;
-  --color-indigo-300: #A0A0FF;
+  /* --- Color: Neutral (text + surfaces, both themes) --- */
+  --neutral-0:    #FFFFFF;
+  --neutral-50:   #FAFBFE;
+  --neutral-100:  #F3F5FC;
+  --neutral-200:  #E8E6E1;
+  --neutral-250:  #D8D2CA;
+  --neutral-300:  #B5ABA2;
+  --neutral-400:  #8A8079;
+  --neutral-600:  #5A534D;
+  --neutral-800:  #2B2622;
+  --neutral-900:  #1C1916;
+  --neutral-950:  #121010;
 
-  /* Color — red (destructive actions) */
-  --color-red-600: #BF3535;
+  /* --- Color: Functional --- */
+  --amber-100: #FBF0E2;
+  --amber-500: #D98324;
+  --amber-700: #9E5D14;
 
-  /* Spacing — 4 px base unit */
-  --space-1: 4px;
-  --space-2: 8px;
-  --space-3: 12px;
-  --space-4: 16px;
-  --space-5: 20px;
-  --space-6: 24px;
+  --green-100: #E2F3EA;
+  --green-500: #2E9E6B;
+  --green-700: #1E6B48;
 
-  /* Border radius */
+  --red-100: #FBE5E5;
+  --red-500: #DB4A4A;
+  --red-700: #9E2D2D;
+
+  /* --- Spacing scale (8px base) --- */
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-5:  20px;
+  --space-6:  24px;
+  --space-8:  32px;
+  --space-10: 40px;
+  --space-12: 48px;
+
+  /* --- Radius scale --- */
   --radius-sm:   8px;
   --radius-md:   12px;
-  --radius-lg:   16px;
-  --radius-full: 999px;
+  --radius-lg:   18px;
+  --radius-xl:   28px;
+  --radius-pill: 30px;
+  --radius-full: 9999px;
 
-  /* Typography — font family */
-  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  /* --- Typography: family --- */
+  --font-family: 'Plus Jakarta Sans', sans-serif;
 
-  /* Typography — size scale */
-  --font-size-xs:   11px;
-  --font-size-sm:   13px;
-  --font-size-base: 15px;
-  --font-size-md:   18px;
-  --font-size-lg:   20px;
+  /* --- Typography: size --- */
+  --font-size-xs:  11px;
+  --font-size-sm:  13px;
+  --font-size-md:  14px;
+  --font-size-lg:  16px;
+  --font-size-xl:  19px;
+  --font-size-2xl: 22px;
+  /* off-scale sizes used by specific components */
+  --font-size-12:  12px;
+  --font-size-15:  15px;
+  --font-size-17:  17px;
+  --font-size-28:  28px;
 
-  /* Motion — duration */
-  --duration-fast: 200ms;
+  /* --- Typography: weight --- */
+  --font-weight-regular:  400;
+  --font-weight-medium:   500;
+  --font-weight-semibold: 600;
+  --font-weight-bold:     700;
+
+  /* --- Typography: line height --- */
+  --line-height-tight: 1.3;
+  --line-height-base:  1.5;
+
+  /* --- Shadow --- */
+  --shadow-card:  0 2px 10px rgba(43, 38, 34, 0.04);
+  --shadow-float: 0 8px 30px rgba(43, 38, 34, 0.15);
+  --shadow-accent: 0 6px 18px rgba(77, 91, 227, 0.40);
+  --shadow-finish: 0 4px 14px rgba(77, 91, 227, 0.30);
+  --shadow-seg:   0 1px 3px rgba(43, 38, 34, 0.12);
+
+  /* --- Motion --- */
+  --duration-fast: 150ms;
   --duration-base: 280ms;
-
-  /* Motion — easing curves */
   --easing-standard:   ease;
   --easing-decelerate: cubic-bezier(0.16, 1, 0.3, 1);
 
-  /* Elevation — raw shadow values */
-  --shadow-sm: 0px 2px 12px rgba(0, 0, 0, 0.4);
-  --shadow-md: 0 8px 20px rgba(0, 0, 0, 0.55);
-  --shadow-lg: 0 6px 16px rgba(0, 0, 0, 0.5);
-}
-
-
-/* ────────────────────────────────────────────────────────────────
-   LAYER 2 — SEMANTIC TOKENS
-   Purpose-driven aliases that reference primitives.
-   Use these throughout all component styles.
-   ──────────────────────────────────────────────────────────────── */
-
-:root {
-
-  /* Backgrounds */
-  --bg:      var(--color-neutral-950); /* page and screen background */
-  --card:    var(--color-neutral-900); /* section and panel surfaces */
-  --surface: var(--color-neutral-800); /* row, input, and chip surfaces */
-
-  /* Borders and chrome */
-  --line:          var(--color-neutral-700); /* dividers and input borders */
-  --handle:        var(--color-neutral-600); /* drag handle, checkbox ring */
-  --btn-secondary: var(--color-neutral-700); /* secondary button fill */
-
-  /* Text */
-  --ink:    var(--color-neutral-50);   /* primary — headings and body copy */
-  --ink-2:  var(--color-neutral-400);  /* secondary — labels and metadata */
-  --ink-3:  var(--color-neutral-500);  /* tertiary — disabled and placeholders */
-  --hint:   var(--color-neutral-450);  /* helper and placeholder text */
-  --strike: var(--color-neutral-500);  /* completed-task strikethrough colour */
-
-  /* Brand and interactive */
-  --accent:         var(--color-blue-500);
-  --accent-hover:   var(--color-blue-400);
-  --accent-pressed: var(--color-blue-600);
-
-  /* Avatar */
-  --avatar-bg:  var(--color-indigo-900);
-  --avatar-ink: var(--color-indigo-300);
-
-  /* Overlay */
-  --overlay: rgba(0, 0, 0, 0.6);
-
-  /* Elevation */
-  --shadow-card:       var(--shadow-sm);
-  --shadow-card-hover: var(--shadow-md);
-  --shadow-fab:        var(--shadow-lg);
-
-  /* Border radius aliases */
-  --r-sm: var(--radius-sm);
-  --r-md: var(--radius-md);
-  --r-lg: var(--radius-lg);
-
-  /* Layout */
-  --pad: var(--space-4);
-  --gap: var(--space-6);
-
-  /* Typography — font stack alias */
-  --font: var(--font-sans);
-
-  /* Typography — composite shorthands (weight size/line-height family) */
-  --t-h1:     700 var(--font-size-lg)/1.3    var(--font);
-  --t-h2:     700 var(--font-size-md)/1.3    var(--font);
-  --t-body:   400 var(--font-size-base)/1.45 var(--font);
-  --t-body-m: 500 var(--font-size-base)/1.45 var(--font);
-  --t-sm:     400 var(--font-size-sm)/1.4    var(--font);
-  --t-xs:     500 var(--font-size-xs)/1.2    var(--font);
-
-  /* Motion */
+  /* --- Type styles (composite shorthands: weight size/line-height family) ---
+     Typography is theme-agnostic, so these compose primitives directly. --- */
+  --font: var(--font-family);
   --ease:     var(--duration-fast) var(--easing-standard);
   --ease-out: var(--duration-base) var(--easing-decelerate);
-
-  /* Device dimensions */
-  --device-w: 390px;
-  --tabbar-h: 72px;
+  --t-h1:     var(--font-weight-bold) var(--font-size-2xl)/var(--line-height-tight) var(--font-family);
+  --t-h2:     var(--font-weight-bold) var(--font-size-xl)/var(--line-height-tight) var(--font-family);
+  --t-title:  var(--font-weight-semibold) var(--font-size-lg)/var(--line-height-tight) var(--font-family);
+  --t-body:   var(--font-weight-medium) var(--font-size-md)/var(--line-height-base) var(--font-family);
+  --t-body-r: var(--font-weight-regular) var(--font-size-md)/var(--line-height-base) var(--font-family);
+  --t-action: var(--font-weight-semibold) var(--font-size-15)/1 var(--font-family);
+  --t-sm:     var(--font-weight-medium) var(--font-size-sm)/1.4 var(--font-family);
+  --t-cat:    var(--font-weight-medium) var(--font-size-sm)/var(--line-height-tight) var(--font-family);
+  --t-xs:     var(--font-weight-semibold) var(--font-size-xs)/1.2 var(--font-family);
 }
 
 
-/* ────────────────────────────────────────────────────────────────
-   LIGHT MODE — semantic overrides
-   Applied when the .light class is present on the <html> element.
-   Only roles that flip between modes are redefined here.
-   Brand / avatar tokens stay constant across modes.
-   ──────────────────────────────────────────────────────────────── */
+/* ============================================
+   2. SEMANTIC TOKENS — LIGHT MODE (default)
+   Meaning attached. Reference primitives only.
+   This layer carries the theme.
+   ============================================ */
+:root {
 
-.light {
+  /* --- Background --- */
+  --color-background-header-start: var(--warm-100);
+  --color-background-header-end:   var(--warm-200);
+  --color-background-page:         var(--neutral-0);
+  --color-surface-raised:          var(--neutral-50);
+  --color-surface-raised-hover:    var(--neutral-100);
+  --color-surface-inverse:         var(--neutral-0);
 
-  /* Backgrounds */
-  --bg:      var(--color-neutral-50);
-  --card:    var(--color-neutral-100);
-  --surface: var(--color-neutral-150);
+  /* --- Glass surfaces (glassmorphism — opacity baked in) --- */
+  --color-surface-glass:             rgba(250, 251, 254, 0.20); /* card default bg  */
+  --color-surface-glass-active:      rgba(243, 245, 252, 0.74); /* card clicked bg  */
+  --color-surface-icon-tile:         rgba(0, 0, 0, 0.05); /* icon tile default */
+  --color-surface-icon-tile-active:  rgba(0, 0, 0, 0.10); /* icon tile clicked */
 
-  /* Borders and chrome */
-  --line:          var(--color-neutral-200);
-  --handle:        var(--color-neutral-150);
-  --btn-secondary: var(--color-neutral-200);
+  /* --- Input focus wrapper --- */
+  --color-input-focus-wrapper:       var(--blue-100);
 
-  /* Text */
-  --ink:    var(--color-neutral-950);
-  --ink-2:  var(--color-neutral-500);
-  --ink-3:  var(--color-neutral-450);
-  --hint:   var(--color-neutral-400);
-  --strike: var(--color-neutral-400);
+  /* --- Background gradient (warm wash → page) --- */
+  --color-background-gradient-1: var(--warm-75);
+  --color-background-gradient-2: var(--warm-40);
+  --color-background-gradient-3: var(--warm-25);
+  --color-background-gradient-4: var(--neutral-0);
 
-  /* Elevation — shadows need to be lighter in light mode */
-  --shadow-card:       0px 2px 12px rgba(0, 0, 0, 0.08);
-  --shadow-card-hover: 0 8px 20px rgba(0, 0, 0, 0.14);
-  --shadow-fab:        0 6px 16px rgba(0, 0, 0, 0.12);
+  /* --- Text --- */
+  --color-text-primary:   var(--neutral-800);
+  --color-text-secondary: var(--neutral-400);
+  --color-text-tertiary:  var(--neutral-300);
+  --color-text-on-accent: var(--neutral-0);
 
-  /* Overlay */
-  --overlay: rgba(0, 0, 0, 0.4);
+  /* --- Accent --- */
+  --color-accent:          var(--blue-500);
+  --color-accent-hover:    var(--blue-600);
+  --color-accent-soft:     var(--blue-50);
+  --color-accent-line:     var(--blue-500);
+  --color-accent-line-off: rgba(77, 91, 227, 0.15);
 
+  /* --- Functional --- */
+  --color-warning:      var(--amber-500);
+  --color-warning-soft: var(--amber-100);
+  --color-success:      var(--green-500);
+  --color-success-soft: var(--green-100);
+  --color-danger:       var(--red-500);
+  --color-danger-soft:  var(--red-100);
+
+  /* --- Border --- */
+  --color-border-subtle: rgba(43, 38, 34, 0.06);
+  --color-border-accent: rgba(77, 91, 227, 0.18);
+
+  /* --- Misc --- */
+  --color-backdrop:    var(--neutral-250);   /* area around the device frame */
+  --color-accent-ring: rgba(77, 91, 227, 0.30); /* focus rings */
+  --color-overlay:     rgba(43, 38, 34, 0.45);   /* modal / sheet scrim */
+  --color-accent-pulse-start: rgba(77, 91, 227, 0);    /* pulse ring keyframe — invisible */
+  --color-accent-pulse-end:   rgba(77, 91, 227, 0.22); /* pulse ring keyframe — visible */
+  --color-on-accent-scrim:    rgba(255, 255, 255, 0.22); /* translucent fill on accent surfaces */
+}
+
+
+/* ============================================
+   2b. SEMANTIC TOKENS — DARK MODE (placeholder)
+   Structure ready. Values to be designed later.
+   Only the semantic layer changes between themes.
+   ============================================ */
+[data-theme="dark"] {
+
+  /* --- Background --- */
+  --color-background-header-start: var(--neutral-900);
+  --color-background-header-end:   var(--neutral-950);
+  --color-background-page:         var(--neutral-950);
+  --color-surface-raised:          var(--neutral-900);
+  --color-surface-raised-hover:    var(--neutral-800);
+  --color-surface-inverse:         var(--neutral-800);
+
+  /* --- Background gradient (warm wash → page) --- */
+  --color-background-gradient-1: var(--neutral-800);
+  --color-background-gradient-2: var(--neutral-900);
+  --color-background-gradient-3: var(--neutral-900);
+  --color-background-gradient-4: var(--neutral-950);
+
+  /* --- Glass surfaces --- */
+  --color-surface-glass:             rgba(28, 25, 22, 0.40);  /* card default bg  */
+  --color-surface-glass-active:      rgba(43, 38, 34, 0.80);  /* card clicked bg  */
+  --color-surface-icon-tile:         rgba(255, 255, 255, 0.08);
+  --color-surface-icon-tile-active:  rgba(255, 255, 255, 0.14);
+
+  /* --- Input focus wrapper --- */
+  --color-input-focus-wrapper:       var(--blue-400);
+
+  /* --- Text --- */
+  --color-text-primary:   var(--neutral-50);
+  --color-text-secondary: var(--neutral-300);
+  --color-text-tertiary:  var(--neutral-400);
+  --color-text-on-accent: var(--neutral-0);
+
+  /* --- Accent --- */
+  --color-accent:          var(--blue-400);
+  --color-accent-hover:    var(--blue-500);
+  --color-accent-soft:     rgba(77, 91, 227, 0.18);
+  --color-accent-line:     var(--blue-400);
+  --color-accent-line-off: rgba(100, 112, 232, 0.25);
+
+  /* --- Functional --- */
+  --color-warning:      var(--amber-500);
+  --color-warning-soft: rgba(217, 131, 36, 0.18);
+  --color-success:      var(--green-500);
+  --color-success-soft: rgba(46, 158, 107, 0.18);
+  --color-danger:       var(--red-500);
+  --color-danger-soft:  rgba(219, 74, 74, 0.18);
+
+  /* --- Border --- */
+  --color-border-subtle: rgba(255, 255, 255, 0.08);
+  --color-border-accent: rgba(100, 112, 232, 0.30);
+
+  /* --- Misc --- */
+  --color-backdrop:    var(--neutral-950);
+  --color-accent-ring: rgba(100, 112, 232, 0.40);
+  --color-overlay:     rgba(0, 0, 0, 0.60);
+  --color-accent-pulse-start: rgba(100, 112, 232, 0);
+  --color-accent-pulse-end:   rgba(100, 112, 232, 0.30);
+  --color-on-accent-scrim:    rgba(255, 255, 255, 0.22);
+}
+
+
+/* ============================================
+   3. COMPONENT TOKENS
+   Component-specific. Reference semantic only.
+   Never change between themes — the semantic
+   tokens underneath do the work.
+   ============================================ */
+:root {
+
+  /* --- App shell --- */
+  --app-background:          var(--color-background-page);
+  --app-header-start:        var(--color-background-header-start);
+  --app-header-end:          var(--color-background-header-end);
+  --app-background-gradient: linear-gradient(
+                               156deg,
+                               var(--color-background-gradient-1) 0%,
+                               var(--color-background-gradient-2) 7%,
+                               var(--color-background-gradient-3) 21%,
+                               var(--color-background-gradient-4) 42%
+                             );
+
+  /* --- Header --- */
+  --header-title-color:      var(--color-text-primary);
+  --menu-button-bg:          rgba(255, 255, 255, 0.55);
+
+  /* --- Finish/handover button --- */
+  --finish-button-bg:        var(--color-accent);
+  --finish-button-text:      var(--color-text-on-accent);
+  --finish-button-shadow:    var(--shadow-accent);
+  --finish-button-pulse-from: var(--color-accent-pulse-start);
+  --finish-button-pulse-to:   var(--color-accent-pulse-end);
+
+  /* --- Section header --- */
+  --section-title-color:     var(--color-text-primary);
+  --section-count-color:     var(--color-text-secondary);
+
+  /* --- Card (task / note / report) --- */
+  --card-background:         var(--color-surface-raised);
+  --card-background-hover:   var(--color-surface-raised-hover);
+  --card-radius:             var(--radius-lg);
+  --card-padding:            var(--space-4);
+  --card-shadow:             var(--shadow-card);
+  --card-border-active:      var(--color-border-subtle);
+  --card-glass-bg:           var(--color-surface-glass);        /* glassmorphism fill */
+  --card-glass-bg-active:    var(--color-surface-glass-active); /* glassmorphism fill — clicked */
+
+  /* --- Accent line --- */
+  --card-line-active:        var(--color-accent-line);
+  --card-line-inactive:      var(--color-accent-line-off);
+
+  /* --- Checkbox --- */
+  --checkbox-border:         var(--color-border-accent);
+  --checkbox-bg:             var(--color-surface-inverse);
+  --checkbox-checked-bg:     var(--color-accent);
+  --checkbox-check-color:    var(--color-text-on-accent);
+
+  /* --- Icon tile --- */
+  --icon-tile-bg:            var(--color-surface-icon-tile);        /* updated: 5% black overlay */
+  --icon-tile-bg-active:     var(--color-surface-icon-tile-active); /* 10% black overlay (clicked) */
+  --icon-tile-color:         var(--color-accent);
+
+  /* --- Task text --- */
+  --task-name-color:         var(--color-text-primary);
+  --task-category-color:     var(--color-text-secondary);
+  --task-done-color:         var(--color-text-secondary);
+  --task-input-placeholder:  var(--color-text-secondary);
+  --task-input-active:       var(--color-text-secondary);
+
+  /* --- Note --- */
+  --note-avatar-bg:          var(--color-accent);
+  --note-avatar-text:        var(--color-text-on-accent);
+  --note-text-color:         var(--color-text-primary);
+  --note-edit-color:         var(--color-accent);
+
+  /* --- Report icon variants --- */
+  --report-icon-warn:        var(--color-warning);
+  --report-icon-stock:       var(--color-accent);
+
+  /* --- Add button --- */
+  --add-button-border:       var(--color-border-accent);
+  --add-button-text:         var(--color-accent);
+  --add-button-bg-hover:     var(--color-accent-soft);
+
+  /* --- Normalising copy --- */
+  --normalising-text-color:  var(--color-text-tertiary);
+
+  /* --- Tab bar --- */
+  --tabbar-bg:               rgba(241, 238, 248, 0.70);
+  --tabbar-border:           rgba(255, 255, 255, 0.60);
+  --tabbar-shadow:           var(--shadow-float);
+  --tab-icon-inactive:       var(--color-text-secondary);
+  --tab-label-inactive:      var(--color-text-secondary);
+  --tab-icon-active:         var(--color-accent);
+  --tab-label-active:        var(--color-accent);
+  --tab-active-pill-bg:      rgba(255, 255, 255, 0.90);
+  --tab-plus-bg:             var(--color-accent);
+  --tab-plus-icon:           var(--color-text-on-accent);
+  --tab-plus-shadow:         var(--shadow-accent);
+
+  /* --- App shell extras --- */
+  --app-backdrop:            var(--color-backdrop);
+  --finish-button-pressed-shadow: var(--shadow-finish);
+  --overlay-bg:              var(--color-overlay);
+
+  /* --- Layout dimensions --- */
+  --device-width:            390px;
+  --device-height:           844px;
+  --device-radius:           44px;
+  --curve-height:            40px;
+  --tabbar-clearance:        120px;
+
+  /* --- Inputs (search / text fields / inline detail) --- */
+  --input-bg:                var(--color-surface-raised);
+  --input-border:            var(--color-border-subtle);
+  --input-text:              var(--color-text-primary);
+  --input-placeholder:       var(--color-text-tertiary);
+  --input-focus-border:      var(--color-accent);
+  --input-focus-ring:        var(--color-accent-ring);
+  --input-focus-wrapper-bg:  var(--color-input-focus-wrapper);
+
+  /* --- Swipe-to-delete --- */
+  --swipe-delete-bg:         var(--color-danger);
+  --swipe-delete-icon:       var(--color-text-on-accent);
+
+  /* --- Bottom sheet --- */
+  --sheet-bg:                var(--color-background-page);
+  --sheet-handle:            var(--color-text-tertiary);
+  --sheet-border:            var(--color-border-subtle);
+  --sheet-tab-color:         var(--color-text-secondary);
+  --sheet-tab-active:        var(--color-accent);
+
+  /* --- Pick row (sheet list item) --- */
+  --pick-row-bg:             var(--color-surface-raised);
+  --pick-row-bg-hover:       var(--color-surface-raised-hover);
+  --pick-row-border:         var(--color-border-subtle);
+  --pick-row-selected-bg:    var(--color-accent-soft);
+  --pick-row-selected-border:var(--color-accent);
+  --radio-border:            var(--color-border-accent);
+  --radio-fill:              var(--color-accent);
+
+  /* --- Chip --- */
+  --chip-bg:                 var(--color-surface-raised);
+  --chip-border:             var(--color-border-subtle);
+  --chip-text:               var(--color-text-primary);
+  --chip-active-bg:          var(--color-accent);
+  --chip-active-text:        var(--color-text-on-accent);
+
+  /* --- One-off / dashed secondary button --- */
+  --oneoff-border:           var(--color-border-accent);
+  --oneoff-text:             var(--color-text-secondary);
+
+  /* --- Menu drawer --- */
+  --menu-bg:                 var(--color-background-page);
+  --menu-border:             var(--color-border-subtle);
+  --menu-avatar-bg:          var(--color-accent);
+  --menu-avatar-text:        var(--color-text-on-accent);
+
+  /* --- Confirm screen --- */
+  --confirm-bg:              var(--color-background-page);
+  --summary-card-bg:         var(--color-surface-raised);
+  --summary-card-border:     var(--color-border-subtle);
+  --summary-add-bg:          var(--color-accent-soft);
+  --summary-add-text:        var(--color-accent);
+
+  /* --- Done screen --- */
+  --done-bg:                 var(--color-background-page);
+  --done-icon:               var(--color-accent);
+
+  /* --- Badge (count pill on primary button) --- */
+  --badge-bg:                var(--color-on-accent-scrim);
+
+  /* --- Segmented theme control --- */
+  --seg-bg:                  var(--color-surface-raised);
+  --seg-border:              var(--color-border-subtle);
+  --seg-active-bg:           var(--color-background-page);
+  --seg-active-text:         var(--color-text-primary);
+  --seg-inactive-text:       var(--color-text-secondary);
+  --seg-active-shadow:       var(--shadow-seg);
 }

@@ -3,13 +3,13 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
-  <meta name="theme-color" content="#0F0F0F" />
+  <meta name="theme-color" content="#F6E2CD" />
   <title>Relay — Handover</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./tokens.css?v=3" />
   <style>
-    @import './tokens.css';
     *, *::before, *::after { box-sizing: border-box; }
     html, body { margin: 0; padding: 0; }
     button { font: inherit; color: inherit; background: none; border: none; padding: 0; cursor: pointer; }
@@ -17,18 +17,18 @@
     ul { list-style: none; padding: 0; margin: 0; }
 
     body {
-      font: var(--t-body);
-      color: var(--ink);
-      background: #050505;
+      font: var(--t-body-r);
+      color: var(--color-text-primary);
+      background: var(--app-backdrop);
       min-height: 100vh;
       display: flex;
       justify-content: center;
       -webkit-font-smoothing: antialiased;
     }
     .device {
-      width: var(--device-w);
+      width: var(--device-width);
       height: 100vh;
-      background: var(--bg);
+      background: var(--app-background-gradient);
       position: relative;
       overflow: hidden;
       display: flex;
@@ -36,294 +36,378 @@
     }
     @media (min-width: 430px) {
       body { padding: 24px 0; align-items: flex-start; }
-      .device { height: 844px; border-radius: 32px; box-shadow: 0 24px 60px rgba(0,0,0,0.6); }
+      .device { height: var(--device-height); border-radius: var(--device-radius); box-shadow: var(--shadow-float); }
     }
+
+    /* sticky header — transparent so the device gradient shows through */
+    .top {
+      flex-shrink: 0; position: relative; z-index: 10;
+      background: transparent;
+    }
+    .statusbar {
+      height: 44px; display: flex; align-items: center; justify-content: space-between;
+      padding: 0 24px; color: var(--color-text-primary);
+      font: var(--font-weight-semibold) var(--font-size-sm)/1 var(--font);
+    }
+    .statusbar .sb-icons { display: flex; gap: 6px; align-items: center; font-size: var(--font-size-12); }
+
+    /* scrollable area — transparent so the device gradient shows through */
     .scroll {
-      flex: 1;
-      overflow-y: auto;
-      overflow-x: hidden;
-      padding: 20px var(--pad) calc(var(--tabbar-h) + 32px);
+      flex: 1; overflow-y: auto; overflow-x: hidden;
+      background: transparent; position: relative;
       -webkit-overflow-scrolling: touch;
+    }
+    .scroll::-webkit-scrollbar { display: none; }
+    .curve { display: none; }
+    .content {
+      background: transparent; min-height: 100%;
+      padding: 12px 20px var(--tabbar-clearance);
     }
 
     /* header */
-    .header { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 8px; margin-bottom: var(--gap); }
-    .header h1 { margin: 0; font: var(--t-h1); }
+    .header { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 20px 16px; }
+    .header-left { display: flex; align-items: center; gap: 12px; }
+    .header h1 { margin: 0; font: var(--t-h1); letter-spacing: -0.02em; color: var(--header-title-color); }
 
     /* hamburger button */
-    .btn-menu { display: grid; place-items: center; width: 36px; height: 36px; border-radius: var(--r-sm); color: var(--ink); transition: background var(--ease), color var(--ease); }
-    .btn-menu:hover { background: var(--surface); }
-    .btn-menu svg { width: 20px; height: 20px; }
+    .btn-menu {
+      display: grid; place-items: center; width: 40px; height: 40px;
+      border-radius: var(--radius-md); color: var(--color-text-primary);
+      background: var(--menu-button-bg); border: 0.5px solid var(--color-border-subtle);
+      transition: background var(--ease);
+    }
+    .btn-menu:hover { background: var(--color-surface-raised-hover); }
+    .btn-menu svg { width: 18px; height: 18px; }
     .btn-finish {
-      font: 500 13px/1 var(--font); color: #fff; border: none;
-      border-radius: var(--r-sm); padding: 9px 13px;
-      background: #1470CC;
+      color: var(--finish-button-text); border: none;
+      border-radius: var(--radius-md); padding: 11px 18px;
+      background: var(--finish-button-bg);
+      font: var(--font-weight-semibold) var(--font-size-md)/1 var(--font);
+      box-shadow: var(--finish-button-pressed-shadow);
       transition: transform var(--ease), background var(--ease);
     }
-    .btn-finish:hover { background: #1260B8; }
+    .btn-finish:hover { background: var(--color-accent-hover); }
     .btn-finish:active { transform: scale(0.97); }
     .btn-finish.pulse { animation: pulse 1.8s ease-in-out 2; }
     @keyframes pulse {
-      0%,100% { box-shadow: 0 0 0 0 rgba(26,135,241,0); }
-      50% { box-shadow: 0 0 0 8px rgba(26,135,241,0.18); }
+      0%,100% { box-shadow: 0 0 0 0 var(--finish-button-pulse-from); }
+      50% { box-shadow: 0 0 0 8px var(--finish-button-pulse-to); }
     }
 
-    /* sections */
-    .section {
-      background: var(--card); border-radius: var(--r-md);
-      box-shadow: var(--shadow-card); padding: var(--pad); margin-bottom: var(--gap);
-    }
-    .section-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 12px; }
-    .section-head h2 { margin: 0; font: var(--t-h2); }
-    .section-meta { font: var(--t-sm); color: var(--ink-2); }
+    /* sections — transparent groupings on white */
+    .section { margin-bottom: 28px; }
+    .section-head { display: flex; align-items: baseline; justify-content: space-between; padding: 0 4px; margin-bottom: 14px; }
+    .section-head h2 { margin: 0; font: var(--t-h2); color: var(--section-title-color); letter-spacing: -0.01em; }
+    .section-meta { font: var(--t-sm); color: var(--section-count-color); }
 
-    /* rows — outer clip container */
-    .row { position: relative; overflow: hidden; border-radius: var(--r-md); margin-bottom: 10px; transition: opacity 0.45s cubic-bezier(0.4, 0, 0.2, 1); }
+    /* rows — outer clip container (rounds + casts the card shadow) */
+    .row { position: relative; overflow: hidden; border-radius: var(--card-radius); margin-bottom: 10px; box-shadow: var(--card-shadow); transition: opacity 0.45s cubic-bezier(0.4, 0, 0.2, 1); }
     .row:last-child { margin-bottom: 0; }
-    #task-list-done { margin-top: 16px; }
+    #task-list-done { margin-top: 10px; }
 
-    /* swipeable card face */
+    /* swipeable card face — glass rect */
     .row-swipe {
-      position: relative; z-index: 1;
-      background: var(--surface); border: 1px solid var(--line);
-      border-radius: var(--r-md); padding: 12px 14px;
+      position: relative; z-index: 1; overflow: hidden;
+      border-radius: var(--card-radius);
+      background: var(--card-glass-bg);
+      border: 1px solid var(--card-border-active);
+      backdrop-filter: blur(37px); -webkit-backdrop-filter: blur(37px);
+      padding: var(--space-4) var(--space-4) var(--space-4) var(--space-5);
       display: flex; flex-direction: column;
       will-change: transform;
-      transition: transform 0.42s cubic-bezier(0.34, 1.15, 0.64, 1), border-color var(--ease);
+      transition: transform 0.42s cubic-bezier(0.34, 1.15, 0.64, 1), background var(--ease);
       user-select: none; -webkit-user-select: none;
     }
     .row-swipe.is-dragging { transition: none; }
+    .row[data-task-id] .row-swipe:hover,
+    .row[data-report-id] .row-swipe:hover,
+    .row.open .row-swipe { background: var(--card-glass-bg-active); }
+    /* task card: icon is a direct sibling of .row-body — horizontal layout */
+    .row[data-task-id] .row-swipe { flex-direction: row; align-items: flex-start; gap: var(--space-4); padding: var(--space-4); }
 
-    /* delete zone revealed behind card */
+    /* left accent line — active when the item has a detail */
+    .row[data-task-id] .row-swipe::before,
+    .row[data-report-id] .row-swipe::before {
+      content: ''; position: absolute; left: 0; top: 50%; transform: translateY(-50%);
+      width: 4px; height: 60%; border-radius: 0 4px 4px 0;
+      background: var(--card-line-inactive); transition: background var(--ease), height var(--ease);
+    }
+    .row.has-detail .row-swipe::before { background: var(--card-line-active); height: 70%; }
+
+    /* delete zone revealed behind card — hidden until swipe starts */
     .row-delete-bg {
       position: absolute; right: 0; top: 0; bottom: 0; width: 88px;
-      background: #BF3535;
+      background: var(--swipe-delete-bg);
       display: flex; align-items: center; justify-content: center;
-      cursor: pointer; border-radius: 0 var(--r-md) var(--r-md) 0;
-      transition: width 0.18s ease, border-radius 0.18s ease;
+      cursor: pointer;
+      opacity: 0;
+      transition: width 0.18s ease, opacity 0.18s ease;
     }
-    .row-delete-bg svg { color: #fff; width: 20px; height: 20px; opacity: 0; transform: scale(0.6) translateX(6px); transition: opacity 0.2s, transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1); }
+    .row.swipe-open .row-delete-bg,
+    .row.swipe-will-delete .row-delete-bg { opacity: 1; }
+    .row-delete-bg svg { color: var(--swipe-delete-icon); width: 20px; height: 20px; opacity: 0; transform: scale(0.6) translateX(6px); transition: opacity 0.2s, transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1); }
     .row.swipe-open .row-delete-bg svg { opacity: 1; transform: scale(1) translateX(0); }
-    .row.swipe-will-delete .row-delete-bg { width: 100%; border-radius: var(--r-md); }
+    .row.swipe-will-delete .row-delete-bg { width: 100%; }
     .row.swipe-will-delete .row-delete-bg svg { opacity: 1; transform: scale(1.1) translateX(0); }
 
     /* row content layout */
-    .row-main { display: flex; align-items: center; gap: 12px; }
-    .row .icon { flex-shrink: 0; width: 16px; height: 16px; color: var(--ink-2); display: grid; place-items: center; }
-    .row .icon svg { width: 14px; height: 14px; }
-    .row-label { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
-    .row-label-top { display: flex; align-items: center; gap: 4px; }
-    .row .label { font: var(--t-body); color: var(--ink); }
-    .row[data-task-id] .label { text-decoration: line-through; text-decoration-color: transparent; transition: color 0.38s ease, text-decoration-color 0.45s ease 0.06s; }
-    .row .row-cat { font: 400 11px/1.3 var(--font); color: var(--ink-3); }
-    .row .chev { flex-shrink: 0; width: 16px; height: 16px; color: var(--ink-3); display: grid; place-items: center; transition: transform var(--ease); }
-    .row .chev svg { width: 14px; height: 14px; }
-    .row.open .chev { transform: rotate(180deg); }
-    .row[data-report-id] .row-main > .chev,
-    .row[data-task-id] .row-main > .chev { margin-left: auto; }
-    .row[data-expandable].open .row-swipe { border-color: var(--ink-3); }
-    .row-detail { display: none; padding: 8px 4px 4px 56px; align-items: flex-start; gap: 8px; }
-    .row.open .row-detail { display: flex; }
-    .row-detail-input {
-      flex: 1; padding: 8px 10px;
-      border: 1px solid var(--line); border-radius: var(--r-sm);
-      background: var(--bg); color: var(--ink); font: var(--t-sm);
-      outline: none; transition: border-color var(--ease);
-    }
-    .row-detail-input::placeholder { color: var(--ink-3); }
-    .row-detail-input:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(26,135,241,0.18); }
-    .row-detail-text { flex: 1; font: var(--t-sm); color: var(--ink-2); line-height: 1.5; }
+    .row-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: var(--space-2); }
+    .row-main { display: flex; align-items: center; gap: var(--space-4); }
 
-    /* checkbox */
+    /* icon tile (semi-transparent surface, custom icon) */
+    .row .icon {
+      flex-shrink: 0; width: 38px; height: 38px; border-radius: var(--radius-md);
+      background: var(--icon-tile-bg);
+      display: grid; place-items: center;
+      transition: background var(--ease);
+    }
+    .row .icon .cat-icon { width: 24px; height: 24px; object-fit: contain; display: block; }
+    .row[data-task-id] .row-swipe:hover .icon,
+    .row.open .icon { background: var(--icon-tile-bg-active); }
+
+    .row-label { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+    .row .label { font: var(--t-title); color: var(--task-name-color); letter-spacing: -0.01em; }
+    .row[data-task-id] .label { text-decoration: line-through; text-decoration-color: transparent; transition: color 0.38s ease, text-decoration-color 0.45s ease 0.06s; }
+    .row .row-cat { font: var(--t-cat); color: var(--task-category-color); }
+
+    /* expanded detail */
+    .row-detail { display: none; align-items: flex-start; gap: 8px; }
+    .row.open .row-detail { display: flex; }
+    .row.done[data-task-id] .row-detail { display: none; }
+    /* blue surround wrapper — matches Figma input-wrapper token */
+    .row-detail-wrapper {
+      flex: 1; padding: 2px; border-radius: var(--radius-md);
+      background: var(--input-focus-wrapper-bg);
+    }
+    .row-detail-input {
+      width: 100%; padding: 8px 10px;
+      border: 1px solid var(--color-accent); border-radius: var(--radius-sm);
+      background: var(--color-surface-inverse); color: var(--input-text); font: var(--t-body);
+      outline: none; transition: border-color var(--ease), box-shadow var(--ease);
+      box-sizing: border-box;
+    }
+    .row-detail-input::placeholder { color: var(--task-input-placeholder); }
+    .row-detail-input:focus { border-color: var(--input-focus-border); box-shadow: 0 0 0 2px var(--input-focus-ring); }
+    .row-detail-text { flex: 1; font: var(--t-sm); color: var(--color-text-secondary); line-height: 1.5; }
+
+    /* checkbox (right side of task cards) */
     .check {
-      flex-shrink: 0; width: 24px; height: 24px; border-radius: 50%;
-      border: 2px solid var(--handle); background: transparent;
+      flex-shrink: 0; width: 26px; height: 26px; border-radius: var(--radius-full);
+      border: 2px solid var(--checkbox-border); background: var(--checkbox-bg);
       display: grid; place-items: center; cursor: pointer;
       transition: background 0.32s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.32s cubic-bezier(0.4, 0, 0.2, 1);
     }
-    .check:hover { border-color: var(--accent); }
-    .check svg { width: 14px; height: 14px; color: #fff; stroke-width: 3; opacity: 0; transform: scale(0.3); transition: opacity 0.18s ease, transform 0.48s cubic-bezier(0.34, 1.9, 0.64, 1); }
-    .row.done .check { background: var(--accent); border-color: var(--accent); }
+    .check:hover { border-color: var(--color-accent); }
+    .check svg { width: 14px; height: 14px; color: var(--checkbox-check-color); stroke-width: 3; opacity: 0; transform: scale(0.3); transition: opacity 0.18s ease, transform 0.48s cubic-bezier(0.34, 1.9, 0.64, 1); }
+    .row.done .check { background: var(--checkbox-checked-bg); border-color: var(--checkbox-checked-bg); }
     .row.done .check svg { opacity: 1; transform: scale(1); }
-    .row.done .label { text-decoration-color: var(--strike); color: var(--strike); }
+    .row.done .label { text-decoration-color: var(--task-done-color); color: var(--task-done-color); }
     .row.done { opacity: 0.5; }
 
     /* notes */
-    .note .row-swipe { flex-direction: row; align-items: flex-start; gap: 4px; padding: 12px 14px; }
-    .note .avatar {
-      width: 32px; height: 32px; border-radius: 50%;
-      background: var(--avatar-bg); color: var(--avatar-ink);
-      display: grid; place-items: center; font: 600 12px/1 var(--font); flex-shrink: 0;
+    .note .row-swipe {
+      flex-direction: row; align-items: flex-start;
+      gap: var(--space-3); padding: 14px var(--space-4);
+      border-left: 4px solid var(--card-line-inactive);
     }
-    .note-body { flex: 1; min-width: 0; }
-    .note .note-title { display: block; font: 600 14px/1.3 var(--font); color: var(--ink); margin-bottom: 4px; }
-    .note .label { font: var(--t-sm); line-height: 1.4; }
-    .note .edit { font: 500 13px/1 var(--font); color: var(--accent); flex-shrink: 0; align-self: flex-start; }
+    .note.open .row-swipe { border-left-color: var(--card-line-active); }
+    .note .avatar {
+      width: 40px; height: 40px; border-radius: var(--radius-full);
+      background: var(--note-avatar-bg); color: var(--note-avatar-text);
+      display: grid; place-items: center; font: var(--font-weight-bold) var(--font-size-sm)/1 var(--font);
+      flex-shrink: 0; letter-spacing: -0.02em;
+    }
+    .note-body {
+      flex: 1; min-width: 0;
+      font: var(--t-body); color: var(--note-text-color); word-break: break-word;
+    }
+    .note:not(.open) .note-body {
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+    }
+    .note .edit {
+      font: var(--font-weight-semibold) var(--font-size-sm)/1 var(--font);
+      color: var(--note-edit-color); flex-shrink: 0; align-self: flex-start;
+    }
     .note .edit:hover { text-decoration: underline; }
 
-    /* add / primary buttons */
+    /* add button — dashed outline */
     .btn-add {
-      width: 100%; padding: 12px; border: none; border-radius: var(--r-md);
-      background: var(--btn-secondary); font: var(--t-body-m); color: var(--ink);
-      margin-top: 10px; transition: background var(--ease), transform var(--ease);
+      width: 100%; background: transparent;
+      border: 1.5px dashed var(--add-button-border); border-radius: var(--card-radius);
+      padding: 14px; font: var(--t-action); color: var(--add-button-text);
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      margin-top: 2px; transition: background var(--ease);
     }
-    .btn-add:hover { background: #3A3A3A; }
+    .btn-add:hover { background: var(--add-button-bg-hover); }
     .btn-add:active { transform: scale(0.99); }
+    .btn-add svg { width: 16px; height: 16px; stroke-width: 2.5; }
 
-    .hint { font: italic 13px/1.4 var(--font); color: var(--hint); text-align: center; margin: 12px 0 4px; }
-    .empty { text-align: center; font: var(--t-body); color: var(--ink-2); padding: 20px 0 8px; }
+    .hint { font: var(--font-weight-regular) var(--font-size-sm)/1.5 var(--font); font-style: italic; color: var(--normalising-text-color); text-align: center; margin: 12px 0 4px; }
+    .empty { text-align: center; font: var(--t-sm); color: var(--color-text-secondary); padding: 6px 0 16px; }
     .hidden { display: none !important; }
 
-    /* tab bar */
-    .tabbar {
+    /* floating frosted pill tab bar */
+    .tabbar-wrap {
       position: absolute; left: 0; right: 0; bottom: 0;
-      height: var(--tabbar-h); background: var(--card); border-top: 1px solid var(--line);
-      display: grid; grid-template-columns: repeat(5,1fr);
-      align-items: center; padding: 0 8px; z-index: 5;
+      padding: 0 16px 20px; z-index: 20; pointer-events: none;
     }
-    .tab { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--ink-3); transition: transform var(--ease), color var(--ease); padding: 6px 0; }
-    .tab svg { width: 22px; height: 22px; }
-    .tab span { font: var(--t-xs); }
-    .tab:active { transform: scale(1.1); }
-    .tab.active { color: var(--accent); }
-    .tab-fab {
-      align-self: center; justify-self: center; width: 56px; height: 56px;
-      border-radius: 50%; background: var(--accent); color: #fff;
-      display: grid; place-items: center; margin-top: -20px;
-      box-shadow: var(--shadow-fab); transition: transform var(--ease);
+    .tabbar {
+      background: var(--tabbar-bg);
+      -webkit-backdrop-filter: blur(24px); backdrop-filter: blur(24px);
+      border: 0.5px solid var(--tabbar-border); border-radius: var(--radius-pill);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 14px; box-shadow: var(--tabbar-shadow);
+      pointer-events: auto;
     }
-    .tab-fab svg { width: 24px; height: 24px; }
-    .tab-fab:active { transform: scale(0.94); }
-    .tab-fab:hover { transform: translateY(-2px); }
+    .tab {
+      display: flex; flex-direction: column; align-items: center; gap: 4px;
+      padding: 8px 12px; border-radius: var(--radius-lg);
+      color: var(--tab-icon-inactive);
+      transition: background var(--ease), color var(--ease), transform var(--ease);
+    }
+    .tab svg { width: 22px; height: 22px; stroke-width: 1.8; }
+    .tab span { font: var(--t-xs); color: var(--tab-label-inactive); }
+    .tab:active { transform: scale(1.05); }
+    .tab.active { background: var(--tab-active-pill-bg); color: var(--tab-icon-active); }
+    .tab.active span { color: var(--tab-label-active); }
+    .tab-plus {
+      flex-shrink: 0; width: 52px; height: 52px; border-radius: var(--radius-full);
+      background: var(--tab-plus-bg); color: var(--tab-plus-icon);
+      display: grid; place-items: center; box-shadow: var(--tab-plus-shadow);
+      transition: transform var(--ease);
+    }
+    .tab-plus svg { width: 24px; height: 24px; stroke-width: 2.5; }
+    .tab-plus:active { transform: scale(0.94); }
+    .tab-plus:hover { transform: translateY(-2px); }
 
     /* sheet */
-    .sheet-overlay { position: absolute; inset: 0; background: var(--overlay); opacity: 0; pointer-events: none; transition: opacity var(--ease-out); z-index: 10; }
+    .sheet-overlay { position: absolute; inset: 0; background: var(--overlay-bg); opacity: 0; pointer-events: none; transition: opacity var(--ease-out); z-index: 10; }
     .sheet-overlay.open { opacity: 1; pointer-events: auto; }
     .sheet {
       position: absolute; left: 0; right: 0; bottom: 0;
-      background: var(--card); border-radius: var(--r-lg) var(--r-lg) 0 0;
+      background: var(--sheet-bg); border-radius: var(--radius-xl) var(--radius-xl) 0 0;
       transform: translateY(100%); transition: transform var(--ease-out);
       z-index: 11; height: 82%; display: flex; flex-direction: column; overflow: hidden;
     }
     .sheet.open { transform: translateY(0); }
-    .sheet-handle { width: 40px; height: 4px; background: var(--handle); border-radius: 2px; margin: 10px auto 6px; flex-shrink: 0; }
-    .sheet-tabs { display: flex; gap: 4px; padding: 8px 16px 0; border-bottom: 1px solid var(--line); flex-shrink: 0; }
-    .sheet-tab { flex: 1; padding: 12px 4px; font: 500 14px/1 var(--font); color: var(--ink-2); border-bottom: 2px solid transparent; margin-bottom: -1px; transition: color var(--ease), border-color var(--ease); }
-    .sheet-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+    .sheet-handle { width: 40px; height: 4px; background: var(--sheet-handle); border-radius: 2px; margin: 10px auto 6px; flex-shrink: 0; }
+    .sheet-tabs { display: flex; gap: 4px; padding: 8px 16px 0; border-bottom: 1px solid var(--sheet-border); flex-shrink: 0; }
+    .sheet-tab { flex: 1; padding: 12px 4px; font: var(--font-weight-medium) var(--font-size-md)/1 var(--font); color: var(--sheet-tab-color); border-bottom: 2px solid transparent; margin-bottom: -1px; transition: color var(--ease), border-color var(--ease); }
+    .sheet-tab.active { color: var(--sheet-tab-active); border-bottom-color: var(--sheet-tab-active); }
     .sheet-body { flex: 1; min-height: 0; overflow-y: auto; padding: 16px; }
-    .sheet-foot { padding: 12px 16px 20px; border-top: 1px solid var(--line); background: var(--card); flex-shrink: 0; }
-    .sheet-foot-hint { font: italic 13px/1.4 var(--font); color: var(--hint); text-align: center; padding: 0 16px 8px; }
+    .sheet-foot { padding: 12px 16px 20px; border-top: 1px solid var(--sheet-border); background: var(--sheet-bg); flex-shrink: 0; }
+    .sheet-foot-hint { font: var(--font-weight-regular) var(--font-size-sm)/1.4 var(--font); font-style: italic; color: var(--normalising-text-color); text-align: center; padding: 0 16px 8px; }
 
     .search-wrap { position: relative; margin-bottom: 18px; }
-    .search-back { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 24px; height: 24px; background: transparent; border: none; color: var(--ink-2); display: none; align-items: center; justify-content: center; cursor: pointer; z-index: 1; padding: 0; transition: color var(--ease); }
+    .search-back { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 24px; height: 24px; background: transparent; border: none; color: var(--color-text-secondary); display: none; align-items: center; justify-content: center; cursor: pointer; z-index: 1; padding: 0; transition: color var(--ease); }
     .search-back svg { width: 18px; height: 18px; }
-    .search-back:hover { color: var(--ink); }
+    .search-back:hover { color: var(--color-text-primary); }
     .search-wrap.active .search-back { display: flex; }
     .search {
-      width: 100%; background: var(--surface); border: 1px solid var(--line);
-      color: var(--ink); border-radius: var(--r-md); padding: 12px 14px;
-      font: var(--t-body); outline: none;
+      width: 100%; background: var(--input-bg); border: 1px solid var(--input-border);
+      color: var(--input-text); border-radius: var(--radius-md); padding: 12px 14px;
+      font: var(--t-body-r); outline: none;
       transition: border-color var(--ease), box-shadow var(--ease), padding-left var(--ease);
     }
     .search-wrap.active .search { padding-left: 44px; }
-    .search::placeholder { color: var(--ink-3); }
-    .search:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(26,135,241,0.25); }
+    .search::placeholder { color: var(--input-placeholder); }
+    .search:focus { border-color: var(--input-focus-border); box-shadow: 0 0 0 2px var(--input-focus-ring); }
 
-    .sheet-section-title { font: 600 15px/1.3 var(--font); margin: 4px 0 10px; }
+    .sheet-section-title { font: var(--font-weight-semibold) var(--font-size-15)/var(--line-height-tight) var(--font); color: var(--color-text-primary); margin: 4px 0 10px; }
     .sheet-section-title.spaced { margin-top: 18px; }
 
     /* pick row — now supports inline detail input */
     .pick-row {
       display: flex; flex-direction: column; align-items: stretch; padding: 12px;
-      border: 1px solid var(--line); border-radius: var(--r-md); margin-bottom: 8px;
-      background: var(--surface); cursor: pointer;
+      border: 1px solid var(--pick-row-border); border-radius: var(--radius-md); margin-bottom: 8px;
+      background: var(--pick-row-bg); cursor: pointer;
       transition: background var(--ease), border-color var(--ease);
     }
-    .pick-row:hover { background: #2A2A2A; }
-    .pick-row.selected { border-color: var(--accent); background: rgba(26,135,241,0.12); }
+    .pick-row:hover { background: var(--pick-row-bg-hover); }
+    .pick-row.selected { border-color: var(--pick-row-selected-border); background: var(--pick-row-selected-bg); }
     .pick-row-main { display: flex; align-items: center; gap: 12px; width: 100%; }
-    .pick-row .radio { width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--handle); flex-shrink: 0; display: grid; place-items: center; transition: border-color var(--ease); }
-    .pick-row .radio::after { content: ''; width: 10px; height: 10px; border-radius: 50%; background: var(--accent); transform: scale(0); transition: transform var(--ease); }
-    .pick-row.selected .radio { border-color: var(--accent); }
+    .pick-row .radio { width: 20px; height: 20px; border-radius: var(--radius-full); border: 2px solid var(--radio-border); flex-shrink: 0; display: grid; place-items: center; transition: border-color var(--ease); }
+    .pick-row .radio::after { content: ''; width: 10px; height: 10px; border-radius: var(--radius-full); background: var(--radio-fill); transform: scale(0); transition: transform var(--ease); }
+    .pick-row.selected .radio { border-color: var(--radio-fill); }
     .pick-row.selected .radio::after { transform: scale(1); }
     .pick-row-label { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
-    .pick-row .label { font: var(--t-body); }
+    .pick-row .label { font: var(--t-body); color: var(--color-text-primary); }
     .pick-row-detail {
       display: none; margin-top: 10px; padding: 10px 12px;
-      background: var(--bg); border: 1px solid var(--line); border-radius: var(--r-sm);
-      color: var(--ink); font: var(--t-sm); outline: none; width: 100%;
+      background: var(--input-bg); border: 1px solid var(--input-border); border-radius: var(--radius-sm);
+      color: var(--input-text); font: var(--t-sm); outline: none; width: 100%;
       transition: border-color var(--ease);
     }
-    .pick-row-detail::placeholder { color: var(--ink-3); }
-    .pick-row-detail:focus { border-color: var(--accent); }
+    .pick-row-detail::placeholder { color: var(--input-placeholder); }
+    .pick-row-detail:focus { border-color: var(--input-focus-border); }
     .pick-row.selected .pick-row-detail { display: block; }
 
     /* one-off (text) button below a category list */
     .btn-oneoff {
-      width: 100%; padding: 12px; border: 1px dashed var(--line);
-      border-radius: var(--r-md); background: transparent; color: var(--ink-2);
-      font: 500 13px/1.4 var(--font); text-align: center;
+      width: 100%; padding: 12px; border: 1px dashed var(--oneoff-border);
+      border-radius: var(--radius-md); background: transparent; color: var(--oneoff-text);
+      font: var(--t-sm); text-align: center;
       transition: border-color var(--ease), color var(--ease), background var(--ease);
       margin: 4px 0 16px; cursor: pointer;
     }
-    .btn-oneoff:hover { border-color: var(--accent); color: var(--ink); background: rgba(26,135,241,0.04); }
+    .btn-oneoff:hover { border-color: var(--color-accent); color: var(--color-text-primary); background: var(--add-button-bg-hover); }
 
     .chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0 12px; }
-    .chip { display: inline-flex; align-items: center; gap: 5px; padding: 8px 14px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); font: 500 13px/1 var(--font); color: var(--ink); transition: background var(--ease), color var(--ease), border-color var(--ease); cursor: pointer; }
-    .chip svg { width: 13px; height: 13px; flex-shrink: 0; }
-    .chip:hover { border-color: #444; }
-    .chip.active { background: var(--accent); color: #fff; border-color: var(--accent); }
-    .pick-row-icon { width: 16px; height: 16px; flex-shrink: 0; color: var(--ink-2); display: grid; place-items: center; }
-    .pick-row-icon svg { width: 14px; height: 14px; }
+    .chip { display: inline-flex; align-items: center; gap: 5px; padding: 8px 14px; border-radius: var(--radius-full); border: 1px solid var(--chip-border); background: var(--chip-bg); font: var(--t-sm); color: var(--chip-text); transition: background var(--ease), color var(--ease), border-color var(--ease); cursor: pointer; }
+    .chip .cat-icon { width: 16px; height: 16px; flex-shrink: 0; object-fit: contain; }
+    .chip:hover { border-color: var(--color-border-accent); }
+    .chip.active { background: var(--chip-active-bg); color: var(--chip-active-text); border-color: var(--chip-active-bg); }
+    .pick-row-icon { width: 20px; height: 20px; flex-shrink: 0; display: grid; place-items: center; }
+    .pick-row-icon .cat-icon { width: 20px; height: 20px; object-fit: contain; display: block; }
 
     .btn-primary {
-      width: 100%; padding: 14px; background: var(--accent); color: #fff;
-      border-radius: var(--r-md); font: 600 15px/1 var(--font);
+      width: 100%; padding: 14px; background: var(--color-accent); color: var(--color-text-on-accent);
+      border-radius: var(--radius-md); font: var(--t-action);
       display: flex; align-items: center; justify-content: center; gap: 8px;
       transition: transform var(--ease), opacity var(--ease);
     }
     .btn-primary:active { transform: scale(0.99); }
     .btn-primary[disabled] { opacity: 0.4; cursor: not-allowed; }
-    .badge { display: inline-flex; align-items: center; justify-content: center; min-width: 22px; height: 22px; padding: 0 6px; background: rgba(255,255,255,0.22); border-radius: 999px; font: 600 12px/1 var(--font); }
+    .badge { display: inline-flex; align-items: center; justify-content: center; min-width: 22px; height: 22px; padding: 0 6px; background: var(--badge-bg); border-radius: var(--radius-full); font: var(--font-weight-semibold) var(--font-size-12)/1 var(--font); }
 
     .field { display: block; margin-bottom: 14px; }
-    .field label { display: block; font: 500 13px/1 var(--font); color: var(--ink-2); margin-bottom: 6px; }
+    .field label { display: block; font: var(--t-sm); color: var(--color-text-secondary); margin-bottom: 6px; }
     .field input, .field textarea {
-      width: 100%; padding: 12px 14px; border: 1px solid var(--line);
-      border-radius: var(--r-md); background: var(--surface); color: var(--ink);
+      width: 100%; padding: 12px 14px; border: 1px solid var(--input-border);
+      border-radius: var(--radius-md); background: var(--input-bg); color: var(--input-text);
       font: var(--t-body); outline: none; transition: border-color var(--ease), box-shadow var(--ease); resize: vertical;
     }
     .field textarea { min-height: 80px; }
     .field textarea.tall { min-height: 110px; }
-    .field input::placeholder, .field textarea::placeholder { color: var(--ink-3); }
-    .field input:focus, .field textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(26,135,241,0.2); }
-    .no-results { text-align: center; padding: 24px 0; font: var(--t-sm); color: var(--ink-3); }
-    .no-results-action { text-align: center; padding: 20px 0; font: var(--t-body); color: var(--ink-2); line-height: 1.5; }
-    .no-results-action .inline-link { background: none; border: none; padding: 0; color: var(--accent); font: inherit; cursor: pointer; text-decoration: underline; }
+    .field input::placeholder, .field textarea::placeholder { color: var(--input-placeholder); }
+    .field input:focus, .field textarea:focus { border-color: var(--input-focus-border); box-shadow: 0 0 0 2px var(--input-focus-ring); }
+    .no-results { text-align: center; padding: 24px 0; font: var(--t-sm); color: var(--color-text-tertiary); }
+    .no-results-action { text-align: center; padding: 20px 0; font: var(--t-body); color: var(--color-text-secondary); line-height: 1.5; }
+    .no-results-action .inline-link { background: none; border: none; padding: 0; color: var(--color-accent); font: inherit; cursor: pointer; text-decoration: underline; }
 
     /* library browse (search focused, empty query) */
-    .lib-cat { border: 1px solid var(--line); border-radius: var(--r-md); margin-bottom: 6px; overflow: hidden; }
-    .lib-cat-head { display: flex; align-items: center; gap: 10px; padding: 12px 14px; cursor: pointer; background: var(--card); user-select: none; transition: background var(--ease); }
-    .lib-cat-head:hover { background: #2A2A2A; }
-    .lib-cat-icon { width: 18px; height: 18px; flex-shrink: 0; color: var(--ink-2); display: grid; place-items: center; }
-    .lib-cat-icon svg { width: 15px; height: 15px; }
-    .lib-cat-name { flex: 1; font: 500 14px/1.2 var(--font); color: var(--ink); }
-    .lib-cat-count { font: 400 12px/1 var(--font); color: var(--ink-3); }
-    .lib-cat-chev { width: 16px; height: 16px; display: grid; place-items: center; color: var(--ink-3); transition: transform var(--ease); }
+    .lib-cat { border: 1px solid var(--pick-row-border); border-radius: var(--radius-md); margin-bottom: 6px; overflow: hidden; }
+    .lib-cat-head { display: flex; align-items: center; gap: 10px; padding: 12px 14px; cursor: pointer; background: var(--pick-row-bg); user-select: none; transition: background var(--ease); }
+    .lib-cat-head:hover { background: var(--pick-row-bg-hover); }
+    .lib-cat-icon { width: 22px; height: 22px; flex-shrink: 0; display: grid; place-items: center; }
+    .lib-cat-icon .cat-icon { width: 22px; height: 22px; object-fit: contain; display: block; }
+    .lib-cat-name { flex: 1; font: var(--font-weight-medium) var(--font-size-md)/1.2 var(--font); color: var(--color-text-primary); }
+    .lib-cat-count { font: var(--font-weight-regular) var(--font-size-12)/1 var(--font); color: var(--color-text-tertiary); }
+    .lib-cat-chev { width: 16px; height: 16px; display: grid; place-items: center; color: var(--color-text-tertiary); transition: transform var(--ease); }
     .lib-cat-chev svg { width: 14px; height: 14px; }
     .lib-cat.open .lib-cat-chev { transform: rotate(180deg); }
-    .lib-cat-body { display: none; border-top: 1px solid var(--line); padding: 8px; }
+    .lib-cat-body { display: none; border-top: 1px solid var(--pick-row-border); padding: 8px; }
     .lib-cat.open .lib-cat-body { display: block; }
     .lib-cat-body .pick-row { margin-bottom: 4px; }
     .lib-cat-body .pick-row:last-child { margin-bottom: 0; }
 
     /* category label in search results */
-    .pick-row-cat { display: block; font: 400 11px/1.3 var(--font); color: var(--ink-3); margin-top: 1px; }
+    .pick-row-cat { display: block; font: var(--font-weight-regular) var(--font-size-xs)/var(--line-height-tight) var(--font); color: var(--color-text-tertiary); margin-top: 1px; }
 
     /* ===== finish handover — confirmation screen ===== */
     .confirm-screen {
       position: absolute; inset: 0;
-      background: var(--bg);
+      background: var(--confirm-bg);
       transform: translateY(100%);
       transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1);
       z-index: 20;
@@ -338,60 +422,60 @@
       overflow-y: auto;
     }
     .confirm-intro {
-      font: italic 22px/1.35 var(--font);
-      color: var(--ink-2);
+      font: italic var(--font-weight-regular) var(--font-size-2xl)/1.35 var(--font);
+      color: var(--color-text-secondary);
       text-align: center;
       margin: 0;
     }
     .confirm-section { margin-top: auto; }
-    .confirm-section h2 { font: var(--t-h1); margin: 0 0 14px; }
+    .confirm-section h2 { font: var(--t-h1); color: var(--color-text-primary); margin: 0 0 14px; }
     .summary-card {
       display: flex; align-items: center; gap: 14px;
-      background: var(--card);
-      border: 1px solid var(--line);
-      border-radius: var(--r-md);
+      background: var(--summary-card-bg);
+      border: 1px solid var(--summary-card-border);
+      border-radius: var(--radius-md);
       padding: 14px 16px;
       margin-bottom: 10px;
     }
     .summary-card:last-of-type { margin-bottom: 0; }
     .summary-count {
-      font: 600 17px/1 var(--font);
-      color: var(--ink);
+      font: var(--font-weight-semibold) var(--font-size-17)/1 var(--font);
+      color: var(--color-text-primary);
       min-width: 14px;
     }
     .summary-label {
       flex: 1;
-      font: var(--t-body-m);
-      color: var(--ink);
+      font: var(--t-body);
+      color: var(--color-text-primary);
     }
     .summary-add {
-      font: 500 14px/1 var(--font);
-      color: var(--accent);
+      font: var(--font-weight-medium) var(--font-size-md)/1 var(--font);
+      color: var(--color-accent);
       padding: 8px 16px;
-      border-radius: var(--r-sm);
-      background: rgba(26,135,241,0.12);
+      border-radius: var(--radius-sm);
+      background: var(--summary-add-bg);
       transition: background var(--ease);
     }
-    .summary-add:hover { background: rgba(26,135,241,0.2); }
+    .summary-add:hover { background: var(--color-accent-soft); }
     .confirm-actions { display: flex; gap: 12px; margin-top: 28px; }
     .btn-back, .btn-finish-shift {
       flex: 1;
       padding: 14px 12px;
-      border-radius: 999px;
-      font: 600 15px/1 var(--font);
+      border-radius: var(--radius-full);
+      font: var(--t-action);
       transition: background var(--ease), border-color var(--ease), transform var(--ease);
       cursor: pointer;
     }
-    .btn-back { background: transparent; border: 1px solid var(--line); color: var(--ink); }
-    .btn-back:hover { background: var(--surface); border-color: #3A3A3A; }
-    .btn-finish-shift { background: var(--accent); color: #fff; border: 1px solid var(--accent); }
-    .btn-finish-shift:hover { background: #1470CC; }
+    .btn-back { background: transparent; border: 1px solid var(--color-border-subtle); color: var(--color-text-primary); }
+    .btn-back:hover { background: var(--color-surface-raised); border-color: var(--color-border-accent); }
+    .btn-finish-shift { background: var(--color-accent); color: var(--color-text-on-accent); border: 1px solid var(--color-accent); }
+    .btn-finish-shift:hover { background: var(--color-accent-hover); }
     .btn-back:active, .btn-finish-shift:active { transform: scale(0.98); }
 
     /* ===== shift done screen ===== */
     .done-screen {
       position: absolute; inset: 0;
-      background: var(--bg);
+      background: var(--done-bg);
       opacity: 0;
       pointer-events: none;
       transition: opacity 0.3s ease;
@@ -404,7 +488,7 @@
     .done-icon {
       display: inline-grid; place-items: center;
       margin-bottom: 24px;
-      color: var(--accent);
+      color: var(--done-icon);
       opacity: 0;
       transform: scale(0.8);
       transition: opacity 0.3s ease-out, transform 0.3s ease-out;
@@ -412,24 +496,24 @@
     .done-screen.open .done-icon { opacity: 1; transform: scale(1); }
     .done-icon svg { width: 48px; height: 48px; stroke-width: 2; }
     .done-title {
-      font: 700 28px/1.2 var(--font);
-      color: var(--ink);
+      font: var(--font-weight-bold) var(--font-size-28)/1.2 var(--font);
+      color: var(--color-text-primary);
       margin: 0 0 12px;
       opacity: 0; transform: translateY(6px);
       transition: opacity 0.3s ease 0.2s, transform 0.3s ease 0.2s;
     }
     .done-screen.open .done-title { opacity: 1; transform: translateY(0); }
     .done-subtitle {
-      font: 400 16px/1.45 var(--font);
-      color: var(--ink-2);
+      font: var(--font-weight-regular) var(--font-size-lg)/1.45 var(--font);
+      color: var(--color-text-secondary);
       margin: 0 0 20px;
       opacity: 0;
       transition: opacity 0.3s ease 0.25s;
     }
     .done-screen.open .done-subtitle { opacity: 1; }
     .done-meta {
-      font: 400 13px/1.4 var(--font);
-      color: var(--ink-2);
+      font: var(--font-weight-regular) var(--font-size-sm)/1.4 var(--font);
+      color: var(--color-text-secondary);
       margin: 0;
       opacity: 0;
       transition: opacity 0.3s ease 0.3s;
@@ -438,22 +522,22 @@
     .btn-new-handover {
       margin-top: 32px;
       padding: 14px 28px;
-      border-radius: 999px;
+      border-radius: var(--radius-full);
       background: transparent;
-      border: 1px solid var(--line);
-      color: var(--ink);
-      font: 600 15px/1 var(--font);
+      border: 1px solid var(--color-border-subtle);
+      color: var(--color-text-primary);
+      font: var(--t-action);
       transition: background var(--ease), border-color var(--ease), transform var(--ease);
       opacity: 0;
       transition: opacity 0.3s ease 0.4s, background var(--ease), border-color var(--ease), transform var(--ease);
     }
     .done-screen.open .btn-new-handover { opacity: 1; }
-    .btn-new-handover:hover { background: var(--surface); border-color: var(--handle); }
+    .btn-new-handover:hover { background: var(--color-surface-raised); border-color: var(--color-border-accent); }
     .btn-new-handover:active { transform: scale(0.97); }
 
     /* ── menu drawer ── */
     .menu-overlay {
-      position: absolute; inset: 0; background: var(--overlay);
+      position: absolute; inset: 0; background: var(--overlay-bg);
       opacity: 0; pointer-events: none;
       transition: opacity var(--ease-out); z-index: 30;
     }
@@ -461,61 +545,61 @@
 
     .menu-drawer {
       position: absolute; top: 0; left: 0; bottom: 0; width: 272px;
-      background: var(--card); z-index: 31;
+      background: var(--menu-bg); z-index: 31;
       transform: translateX(-100%);
       transition: transform var(--ease-out);
       display: flex; flex-direction: column;
-      border-radius: 0 var(--r-lg) var(--r-lg) 0;
+      border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
     }
     .menu-drawer.open { transform: translateX(0); }
 
     .menu-header {
       display: flex; align-items: center; gap: 12px;
       padding: 24px 16px 16px;
-      border-bottom: 1px solid var(--line);
+      border-bottom: 1px solid var(--menu-border);
     }
     .menu-avatar {
-      width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0;
-      background: var(--avatar-bg); color: var(--avatar-ink);
-      display: grid; place-items: center; font: 600 13px/1 var(--font);
+      width: 40px; height: 40px; border-radius: var(--radius-full); flex-shrink: 0;
+      background: var(--menu-avatar-bg); color: var(--menu-avatar-text);
+      display: grid; place-items: center; font: var(--font-weight-semibold) var(--font-size-sm)/1 var(--font);
     }
     .menu-user-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
-    .menu-user-name { font: 600 15px/1.2 var(--font); color: var(--ink); }
-    .menu-user-role { font: 400 12px/1.2 var(--font); color: var(--ink-2); }
+    .menu-user-name { font: var(--font-weight-semibold) var(--font-size-15)/1.2 var(--font); color: var(--color-text-primary); }
+    .menu-user-role { font: var(--font-weight-regular) var(--font-size-12)/1.2 var(--font); color: var(--color-text-secondary); }
     .menu-close {
       flex-shrink: 0; display: grid; place-items: center;
-      width: 32px; height: 32px; border-radius: var(--r-sm);
-      color: var(--ink-2); transition: background var(--ease), color var(--ease);
+      width: 32px; height: 32px; border-radius: var(--radius-sm);
+      color: var(--color-text-secondary); transition: background var(--ease), color var(--ease);
     }
-    .menu-close:hover { background: var(--surface); color: var(--ink); }
+    .menu-close:hover { background: var(--color-surface-raised); color: var(--color-text-primary); }
     .menu-close svg { width: 18px; height: 18px; }
 
     .menu-body { flex: 1; padding: 20px 16px; overflow-y: auto; }
     .menu-section-title {
-      font: 600 11px/1.2 var(--font); color: var(--ink-3);
+      font: var(--font-weight-semibold) var(--font-size-xs)/1.2 var(--font); color: var(--color-text-tertiary);
       text-transform: uppercase; letter-spacing: 0.07em;
       margin: 0 0 10px;
     }
 
     /* theme toggle — segmented control */
     .theme-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-    .theme-row-label { font: var(--t-body-m); color: var(--ink); }
+    .theme-row-label { font: var(--t-body); color: var(--color-text-primary); }
     .theme-seg {
       display: flex; align-items: center; gap: 2px;
-      background: var(--surface); border: 1px solid var(--line);
-      border-radius: 999px; padding: 3px;
+      background: var(--seg-bg); border: 1px solid var(--seg-border);
+      border-radius: var(--radius-full); padding: 3px;
     }
     .theme-opt {
       display: flex; align-items: center; gap: 5px;
-      padding: 6px 12px; border-radius: 999px;
-      font: 500 13px/1 var(--font); color: var(--ink-3);
+      padding: 6px 12px; border-radius: var(--radius-full);
+      font: var(--font-weight-medium) var(--font-size-sm)/1 var(--font); color: var(--seg-inactive-text);
       transition: background var(--ease), color var(--ease), box-shadow var(--ease);
       cursor: pointer;
     }
     .theme-opt svg { width: 13px; height: 13px; flex-shrink: 0; }
     .theme-opt.active {
-      background: var(--bg); color: var(--ink);
-      box-shadow: 0 1px 3px rgba(0,0,0,0.18);
+      background: var(--seg-active-bg); color: var(--seg-active-text);
+      box-shadow: var(--seg-active-shadow);
     }
 
     /* ── smooth theme transition ── */
@@ -526,69 +610,74 @@
         border-color 0.28s ease,
         box-shadow 0.28s ease !important;
     }
-
-    /* ── light-mode overrides for hardcoded dark values ── */
-    html.light body { background: #DEDEDE; }
-    html.light .check { border-color: var(--color-neutral-400); }
-    html.light .pick-row .radio { border-color: var(--color-neutral-400); }
-    html.light .btn-add:hover { background: var(--color-neutral-200); }
-    html.light .pick-row:hover { background: var(--color-neutral-200); }
-    html.light .lib-cat-head:hover { background: var(--color-neutral-200); }
-    html.light .chip:hover { border-color: var(--color-neutral-400); }
-    html.light .btn-back:hover { border-color: var(--color-neutral-400); }
   </style>
 </head>
 <body>
   <div class="device" id="device">
-    <main class="scroll">
+    <div class="top">
+      <div class="statusbar">
+        <span>9:41</span>
+        <span class="sb-icons">●●● ⌃ ▮</span>
+      </div>
       <header class="header">
-        <button class="btn-menu" id="btn-menu" aria-label="Open menu" aria-expanded="false" aria-controls="menu-drawer">
-          <i data-lucide="menu"></i>
-        </button>
-        <h1>Your handover</h1>
-        <button class="btn-finish pulse" type="button">Finish handover</button>
+        <div class="header-left">
+          <button class="btn-menu" id="btn-menu" aria-label="Open menu" aria-expanded="false" aria-controls="menu-drawer">
+            <i data-lucide="menu"></i>
+          </button>
+          <h1>The handover</h1>
+        </div>
+        <button class="btn-finish pulse" type="button">Hand over</button>
       </header>
+    </div>
 
-      <section class="section">
-        <div class="section-head">
-          <h2>Tasks</h2>
-          <span class="section-meta" id="tasks-meta"></span>
-        </div>
-        <ul id="task-list"></ul>
-        <ul id="task-list-done"></ul>
-        <p class="empty hidden" id="tasks-empty">No tasks added yet</p>
-        <button class="btn-add" data-open-sheet="task">Add task</button>
-      </section>
+    <main class="scroll">
+      <svg class="curve" viewBox="0 0 390 40" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M0,40 L0,18 Q195,-12 390,18 L390,40 Z"/>
+      </svg>
+      <div class="content">
+        <section class="section">
+          <div class="section-head">
+            <h2>Tasks</h2>
+            <span class="section-meta" id="tasks-meta"></span>
+          </div>
+          <ul id="task-list"></ul>
+          <ul id="task-list-done"></ul>
+          <p class="empty hidden" id="tasks-empty">No tasks added yet</p>
+          <button class="btn-add" data-open-sheet="task"><i data-lucide="plus"></i>Add task</button>
+        </section>
 
-      <section class="section">
-        <div class="section-head">
-          <h2>Notes</h2>
-          <span class="section-meta" id="notes-meta"></span>
-        </div>
-        <ul id="notes-list"></ul>
-        <p class="empty hidden" id="notes-empty">No notes added yet</p>
-        <button class="btn-add" data-open-sheet="note">Add note</button>
-      </section>
+        <section class="section">
+          <div class="section-head">
+            <h2>Notes</h2>
+            <span class="section-meta" id="notes-meta"></span>
+          </div>
+          <ul id="notes-list"></ul>
+          <p class="empty hidden" id="notes-empty">No notes added yet</p>
+          <button class="btn-add" data-open-sheet="note"><i data-lucide="plus"></i>Add note</button>
+        </section>
 
-      <section class="section">
-        <div class="section-head">
-          <h2>Reports</h2>
-          <span class="section-meta" id="reports-meta"></span>
-        </div>
-        <ul id="reports-list"></ul>
-        <p class="empty hidden" id="reports-empty">No report added yet</p>
-        <p class="hint hidden" id="reports-hint">Most shifts have something worth flagging. It all helps.</p>
-        <button class="btn-add" data-open-sheet="report">Add report</button>
-      </section>
+        <section class="section">
+          <div class="section-head">
+            <h2>Reports</h2>
+            <span class="section-meta" id="reports-meta"></span>
+          </div>
+          <ul id="reports-list"></ul>
+          <p class="empty hidden" id="reports-empty">No report added yet</p>
+          <p class="hint hidden" id="reports-hint">Most shifts have something worth flagging. It all helps.</p>
+          <button class="btn-add" data-open-sheet="report"><i data-lucide="plus"></i>Add report</button>
+        </section>
+      </div>
     </main>
 
-    <nav class="tabbar">
-      <button class="tab active"><i data-lucide="clipboard-list"></i><span>Handover</span></button>
-      <button class="tab"><i data-lucide="history"></i><span>History</span></button>
-      <button class="tab-fab" data-open-sheet="task"><i data-lucide="plus"></i></button>
-      <button class="tab"><i data-lucide="users"></i><span>Team</span></button>
-      <button class="tab"><i data-lucide="user"></i><span>Profile</span></button>
-    </nav>
+    <div class="tabbar-wrap">
+      <nav class="tabbar">
+        <button class="tab active"><i data-lucide="clipboard-list"></i><span>Handover</span></button>
+        <button class="tab"><i data-lucide="history"></i><span>History</span></button>
+        <button class="tab-plus" data-open-sheet="task"><i data-lucide="plus"></i></button>
+        <button class="tab"><i data-lucide="users"></i><span>Team</span></button>
+        <button class="tab"><i data-lucide="user"></i><span>Profile</span></button>
+      </nav>
+    </div>
 
     <div class="sheet-overlay" id="sheet-overlay"></div>
     <div class="sheet" id="sheet" role="dialog" aria-modal="true">
@@ -685,13 +774,13 @@
         <div class="theme-row">
           <span class="theme-row-label">Theme</span>
           <div class="theme-seg" id="theme-seg">
-            <button class="theme-opt active" data-theme="dark" aria-label="Dark mode">
-              <i data-lucide="moon"></i>
-              <span>Dark</span>
-            </button>
-            <button class="theme-opt" data-theme="light" aria-label="Light mode">
+            <button class="theme-opt active" data-theme="light" aria-label="Light mode">
               <i data-lucide="sun"></i>
               <span>Light</span>
+            </button>
+            <button class="theme-opt" data-theme="dark" aria-label="Dark mode">
+              <i data-lucide="moon"></i>
+              <span>Dark</span>
             </button>
           </div>
         </div>
@@ -725,7 +814,9 @@
           { id: 3, title: 'Wipe down counter', category: 'Cleaning', completed: false, description: '' },
           { id: 4, title: 'Mop floor behind counter', category: 'Cleaning', completed: true, description: '' }
         ],
-        notes: [],
+        notes: [
+          { id: 1, author: 'MK', avatarColor: '#2A2A4A', title: '', text: 'Guy coming back at 17:00 to pay for his americano — he had a large one. He was wearing a black jacket and a red hat with a pink scarf. Friendly.' }
+        ],
         reports: []
       },
       taskLibrary: {
@@ -820,14 +911,15 @@
     };
 
     /* ===== HELPERS ===== */
-    const TASK_ICONS = { Cleaning: 'sparkles', Stock: 'package', Equipment: 'wrench', Prep: 'chef-hat', Admin: 'clipboard-list', Other: 'tag' };
-    const REPORT_ICONS = { Complaints: 'alert-triangle', Till: 'receipt', Injury: 'shield-alert', Stock: 'package', Other: 'tag' };
+    const TASK_ICONS = { Cleaning: 'icons/clean.svg', Stock: 'icons/stock.svg', Equipment: 'icons/equipment.svg', Prep: 'icons/prep.svg', Admin: 'icons/admin.svg', Other: 'icons/other.svg' };
+    const REPORT_ICONS = { Complaints: 'icons/complaints.svg', Till: 'icons/till.svg', Injury: 'icons/injury.svg', Stock: 'icons/stock.svg', Other: 'icons/other.svg' };
     const REPORT_NOUN = { Complaints: 'complaint', Till: 'till', Injury: 'injury', Stock: 'stock' };
     const TASK_CATEGORIES = ['Cleaning', 'Stock', 'Equipment', 'Prep', 'Admin', 'Other'];
     const REPORT_CATEGORIES = ['Complaints', 'Till', 'Injury', 'Stock', 'Other'];
 
-    function taskIcon(cat) { return TASK_ICONS[cat] || 'tag'; }
-    function reportIcon(cat) { return REPORT_ICONS[cat] || 'alert-circle'; }
+    function taskIcon(cat) { return TASK_ICONS[cat] || TASK_ICONS.Other; }
+    function reportIcon(cat) { return REPORT_ICONS[cat] || REPORT_ICONS.Other; }
+    function catIconEl(src) { return `<img src="${src}" alt="" class="cat-icon">`; }
     const byFreq = (a, b) => (b.frequency || 0) - (a.frequency || 0);
     function sortedCats(library) {
       return Object.entries(library)
@@ -882,30 +974,29 @@
     /* ===== ROW BUILDERS (main handover screen) ===== */
     function buildTaskRow(task) {
       const li = document.createElement('li');
-      li.className = 'row' + (task.completed ? ' done' : '');
-      li.dataset.taskId = task.id;
-      const icon = taskIcon(task.category);
       const hasDesc = !!task.description;
-      if (!hasDesc) li.dataset.expandable = 'true';
+      li.className = 'row' + (task.completed ? ' done' : '') + (hasDesc ? ' has-detail' : '');
+      li.dataset.taskId = task.id;
+      li.dataset.expandable = 'true';
+      const icon = taskIcon(task.category);
       li.innerHTML = `
         <div class="row-delete-bg"><i data-lucide="trash-2"></i></div>
         <div class="row-swipe">
-          <div class="row-main">
-            <button class="check" aria-label="Toggle complete">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg>
-            </button>
-            <span class="icon"><i data-lucide="${icon}"></i></span>
-            <div class="row-label">
-              <div class="row-label-top">
+          <span class="icon">${catIconEl(icon)}</span>
+          <div class="row-body">
+            <div class="row-main">
+              <div class="row-label">
                 <span class="label">${esc(task.title)}</span>
+                <span class="row-cat">${esc(task.category)}</span>
               </div>
-              <span class="row-cat">${esc(task.category)}</span>
+              <button class="check" aria-label="Toggle complete">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg>
+              </button>
             </div>
-            ${hasDesc ? `<button class="chev" aria-label="Toggle detail"><i data-lucide="chevron-down"></i></button>` : ''}
+            ${hasDesc
+              ? `<div class="row-detail"><span class="row-detail-text">${esc(task.description)}</span></div>`
+              : `<div class="row-detail"><div class="row-detail-wrapper"><input class="row-detail-input" type="text" placeholder="Add details (optional)" data-detail-task-id="${task.id}" value="${esc(task.description ?? '')}" /></div></div>`}
           </div>
-          ${hasDesc
-            ? `<div class="row-detail"><span class="row-detail-text">${esc(task.description)}</span></div>`
-            : `<div class="row-detail"><input class="row-detail-input" type="text" placeholder="Add details (optional)" data-detail-task-id="${task.id}" value="${esc(task.description)}" /></div>`}
         </div>`;
       return li;
     }
@@ -914,38 +1005,39 @@
       const li = document.createElement('li');
       li.className = 'row note';
       li.dataset.noteId = note.id;
+      li.dataset.expandable = 'true';
+      const avatarStyle = note.avatarColor ? ` style="background:${esc(note.avatarColor)}"` : '';
       li.innerHTML = `
         <div class="row-delete-bg"><i data-lucide="trash-2"></i></div>
         <div class="row-swipe">
-          <div class="avatar" style="background:${esc(note.avatarColor)}">${esc(note.author)}</div>
-          <div class="note-body">
-            ${note.title ? `<span class="note-title">${esc(note.title)}</span>` : ''}
-            <span class="label">${esc(note.text)}</span>
-          </div>
+          <div class="avatar"${avatarStyle}>${esc(note.author || '?')}</div>
+          <p class="note-body">${esc(note.text)}</p>
           <button class="edit" data-note-id="${note.id}">edit</button>
         </div>`;
       return li;
     }
 
+    function reportIconVariant(cat) { return (cat === 'Complaints' || cat === 'Injury') ? 'warn' : 'stock'; }
+
     function buildReportRow(report) {
       const li = document.createElement('li');
-      li.className = 'row';
-      li.dataset.reportId = report.id;
-      const icon = reportIcon(report.category);
       const hasDesc = !!report.description;
-      if (!hasDesc) li.dataset.expandable = 'true';
+      li.className = 'row' + (hasDesc ? ' has-detail' : '');
+      li.dataset.reportId = report.id;
+      li.dataset.expandable = 'true';
+      const icon = reportIcon(report.category);
+      const variant = reportIconVariant(report.category);
       li.innerHTML = `
         <div class="row-delete-bg"><i data-lucide="trash-2"></i></div>
         <div class="row-swipe">
           <div class="row-main">
-            <span class="icon"><i data-lucide="${icon}"></i></span>
+            <span class="icon">${catIconEl(icon)}</span>
             <div class="row-label">
               <div class="row-label-top">
                 <span class="label">${esc(report.title)}</span>
               </div>
               <span class="row-cat">${esc(report.category)}</span>
             </div>
-            ${hasDesc ? `<button class="chev" aria-label="Toggle detail"><i data-lucide="chevron-down"></i></button>` : ''}
           </div>
           ${hasDesc
             ? `<div class="row-detail"><span class="row-detail-text">${esc(report.description)}</span></div>`
@@ -1003,8 +1095,8 @@
       const selected = kind === 'task' ? ui.selectedTaskIds.has(libId) : ui.selectedReportIds.has(libId);
       const detailVal = kind === 'task' ? (ui.taskDetails[libId] || '') : (ui.reportDetails[libId] || '');
       const dataAttr = kind === 'task' ? `data-lib-id="${esc(libId)}"` : `data-rep-id="${esc(libId)}"`;
-      const iconName = category ? (kind === 'task' ? taskIcon(category) : reportIcon(category)) : null;
-      const iconEl = iconName ? `<span class="pick-row-icon"><i data-lucide="${iconName}"></i></span>` : '';
+      const iconSrc = category ? (kind === 'task' ? taskIcon(category) : reportIcon(category)) : null;
+      const iconEl = iconSrc ? `<span class="pick-row-icon">${catIconEl(iconSrc)}</span>` : '';
       const catLabel = category ? `<span class="pick-row-cat">${esc(category)}</span>` : '';
       return `
         <li class="pick-row${selected ? ' selected' : ''}" ${dataAttr}>
@@ -1023,8 +1115,8 @@
     function chipsHTML(categories, active, attr, iconsMap) {
       let html = '<div class="chips">';
       categories.forEach(c => {
-        const iconName = iconsMap ? (iconsMap[c] || 'tag') : null;
-        const iconEl = iconName ? `<i data-lucide="${iconName}"></i>` : '';
+        const iconSrc = iconsMap ? iconsMap[c] : null;
+        const iconEl = iconSrc ? catIconEl(iconSrc) : '';
         html += `<button class="chip${active === c ? ' active' : ''}" ${attr}="${esc(c)}">${iconEl}${esc(c)}</button>`;
       });
       html += '</div>';
@@ -1072,7 +1164,7 @@
           const open = ui.taskExpandedCats.has(c);
           html += `<div class="lib-cat${open ? ' open' : ''}" data-lib-cat="${esc(c)}">
             <div class="lib-cat-head">
-              <span class="lib-cat-icon"><i data-lucide="${taskIcon(c)}"></i></span>
+              <span class="lib-cat-icon">${catIconEl(taskIcon(c))}</span>
               <span class="lib-cat-name">${esc(c)}</span>
               <span class="lib-cat-count">${items.length}</span>
               <span class="lib-cat-chev"><i data-lucide="chevron-down"></i></span>
@@ -1177,7 +1269,7 @@
           const open = ui.reportExpandedCats.has(c);
           html += `<div class="lib-cat${open ? ' open' : ''}" data-rep-lib-cat="${esc(c)}">
             <div class="lib-cat-head">
-              <span class="lib-cat-icon"><i data-lucide="${reportIcon(c)}"></i></span>
+              <span class="lib-cat-icon">${catIconEl(reportIcon(c))}</span>
               <span class="lib-cat-name">${esc(c)}</span>
               <span class="lib-cat-count">${items.length}</span>
               <span class="lib-cat-chev"><i data-lucide="chevron-down"></i></span>
@@ -1449,13 +1541,9 @@
         return;
       }
 
-      // expand row (chevron — tasks/reports with description)
-      const chev = e.target.closest('.chev');
-      if (chev) { chev.closest('.row')?.classList.toggle('open'); return; }
-
-      // expand row (card tap — tasks without description)
+      // expand row (whole-card tap — tasks, notes & reports)
       const expandable = e.target.closest('.row[data-expandable]');
-      if (expandable && !e.target.closest('.check') && !e.target.closest('.row-delete-bg') && !e.target.closest('.row-detail-input')) {
+      if (expandable && !e.target.closest('.check') && !e.target.closest('.row-delete-bg') && !e.target.closest('.row-detail-input') && !e.target.closest('.edit[data-note-id]')) {
         document.querySelectorAll('.row[data-expandable].open').forEach(r => { if (r !== expandable) r.classList.remove('open'); });
         expandable.classList.toggle('open');
         if (expandable.classList.contains('open')) {
@@ -2023,11 +2111,13 @@
           html.classList.add('theme-changing');
           setTimeout(() => html.classList.remove('theme-changing'), 320);
         }
-        html.classList.toggle('light', theme === 'light');
+        // light is the default theme; dark is opt-in via the data-theme attribute
+        if (theme === 'dark') html.setAttribute('data-theme', 'dark');
+        else html.removeAttribute('data-theme');
 
-        // update meta theme-color
+        // update meta theme-color to match the warm/dark header
         const metaColor = document.querySelector('meta[name="theme-color"]');
-        if (metaColor) metaColor.content = theme === 'light' ? '#F0F0F0' : '#0F0F0F';
+        if (metaColor) metaColor.content = theme === 'dark' ? '#1C1916' : '#F6E2CD';
 
         // sync segmented control
         document.querySelectorAll('.theme-opt').forEach(btn => {
@@ -2037,9 +2127,9 @@
         try { localStorage.setItem(STORAGE_KEY, theme); } catch (_) {}
       }
 
-      // init from localStorage
+      // init from localStorage — default to light
       const saved = (() => { try { return localStorage.getItem(STORAGE_KEY); } catch (_) { return null; } })();
-      applyTheme(saved === 'light' ? 'light' : 'dark', false);
+      applyTheme(saved === 'dark' ? 'dark' : 'light', false);
 
       // theme-opt clicks
       document.addEventListener('click', e => {
