@@ -206,17 +206,25 @@
 
     /* notes */
     .note .row-swipe {
-      flex-direction: row; align-items: flex-start;
+      flex-direction: row; align-items: center;
       gap: var(--space-3); padding: 14px var(--space-4);
-      border-left: 4px solid var(--card-line-inactive);
     }
-    .note.open .row-swipe { border-left-color: var(--card-line-active); }
+    /* accent line — absolutely positioned bar, NOT full height */
+    .note .row-swipe::before {
+      content: ''; position: absolute;
+      left: 0; top: var(--space-4); bottom: var(--space-4);
+      width: 4px; border-radius: 0 4px 4px 0;
+      background: var(--card-line-inactive);
+      transition: background var(--ease);
+    }
+    .note.open .row-swipe::before { background: var(--card-line-active); }
     .note .avatar {
       width: 40px; height: 40px; border-radius: var(--radius-full);
-      background: var(--note-avatar-bg); color: var(--note-avatar-text);
-      display: grid; place-items: center; font: var(--font-weight-bold) var(--font-size-sm)/1 var(--font);
-      flex-shrink: 0; letter-spacing: -0.02em;
+      background: var(--note-avatar-bg); overflow: hidden; flex-shrink: 0;
+      display: flex; align-items: flex-end; justify-content: center;
+      padding-top: 4px;
     }
+    .note .avatar-img { width: 100%; display: block; object-fit: cover; }
     .note-body {
       flex: 1; min-width: 0;
       font: var(--t-body); color: var(--note-text-color); word-break: break-word;
@@ -226,7 +234,7 @@
     }
     .note .edit {
       font: var(--font-weight-semibold) var(--font-size-sm)/1 var(--font);
-      color: var(--note-edit-color); flex-shrink: 0; align-self: flex-start;
+      color: var(--note-edit-color); flex-shrink: 0;
     }
     .note .edit:hover { text-decoration: underline; }
 
@@ -1006,11 +1014,10 @@
       li.className = 'row note';
       li.dataset.noteId = note.id;
       li.dataset.expandable = 'true';
-      const avatarStyle = note.avatarColor ? ` style="background:${esc(note.avatarColor)}"` : '';
       li.innerHTML = `
         <div class="row-delete-bg"><i data-lucide="trash-2"></i></div>
         <div class="row-swipe">
-          <div class="avatar"${avatarStyle}>${esc(note.author || '?')}</div>
+          <div class="avatar"><img src="icons/Avatar.png" alt="" class="avatar-img"></div>
           <p class="note-body">${esc(note.text)}</p>
           <button class="edit" data-note-id="${note.id}">edit</button>
         </div>`;
