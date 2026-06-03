@@ -41,6 +41,7 @@
   --neutral-300:  #B5ABA2;
   --neutral-400:  #8A8079;
   --neutral-600:  #5A534D;
+  --neutral-700:  #444342;
   --neutral-800:  #2B2622;
   --neutral-900:  #1C1916;
   --neutral-950:  #121010;
@@ -167,6 +168,7 @@
   --color-text-primary:   var(--neutral-800);
   --color-text-secondary: var(--neutral-400);
   --color-text-tertiary:  var(--neutral-300);
+  --color-text-subdued:   var(--neutral-700);   /* mid-tone: between primary and secondary */
   --color-text-on-accent: var(--neutral-0);
 
   /* --- Accent --- */
@@ -232,6 +234,7 @@
   --color-text-primary:   var(--neutral-50);
   --color-text-secondary: var(--neutral-300);
   --color-text-tertiary:  var(--neutral-400);
+  --color-text-subdued:   var(--neutral-200);   /* mid-tone in dark mode */
   --color-text-on-accent: var(--neutral-0);
 
   /* --- Accent --- */
@@ -349,14 +352,14 @@
   --normalising-text-color:  var(--color-text-tertiary);
 
   /* --- Tab bar --- */
-  --tabbar-bg:               rgba(241, 238, 248, 0.70);
-  --tabbar-border:           rgba(255, 255, 255, 0.60);
+  --tabbar-bg:               rgba(250, 251, 254, 0.45);  /* near-white semi-transparent */
   --tabbar-shadow:           var(--shadow-float);
-  --tab-icon-inactive:       var(--color-text-secondary);
-  --tab-label-inactive:      var(--color-text-secondary);
-  --tab-icon-active:         var(--color-accent);
-  --tab-label-active:        var(--color-accent);
-  --tab-active-pill-bg:      rgba(255, 255, 255, 0.90);
+  --tab-icon-inactive:       var(--color-text-subdued);  /* #444342 — mid-tone neutral */
+  --tab-label-inactive:      var(--color-text-subdued);
+  --tab-icon-active:         var(--color-accent-hover);  /* #3A45B0 — deeper blue */
+  --tab-label-active:        var(--color-accent-hover);
+  --tab-active-pill-bg:      rgba(0, 0, 0, 0.07);        /* subtle dark overlay */
+  --tab-active-pill-border:  var(--color-border-subtle); /* rgba(43,38,34,0.06) */
   --tab-plus-bg:             var(--color-accent);
   --tab-plus-icon:           var(--color-text-on-accent);
   --tab-plus-shadow:         var(--shadow-accent);

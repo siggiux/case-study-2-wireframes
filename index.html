@@ -122,8 +122,9 @@
     .row[data-task-id] .row-swipe:hover,
     .row[data-report-id] .row-swipe:hover,
     .row.open .row-swipe { background: var(--card-glass-bg-active); }
-    /* task card: icon is a direct sibling of .row-body — horizontal layout */
-    .row[data-task-id] .row-swipe { flex-direction: row; align-items: flex-start; gap: var(--space-4); padding: var(--space-4); }
+    /* task + report cards: icon is a direct sibling of .row-body — horizontal layout */
+    .row[data-task-id] .row-swipe,
+    .row[data-report-id] .row-swipe { flex-direction: row; align-items: flex-start; gap: var(--space-4); padding: var(--space-4); }
 
     /* left accent line — active when the item has a detail */
     .row[data-task-id] .row-swipe::before,
@@ -261,8 +262,7 @@
     }
     .tabbar {
       background: var(--tabbar-bg);
-      -webkit-backdrop-filter: blur(24px); backdrop-filter: blur(24px);
-      border: 0.5px solid var(--tabbar-border); border-radius: var(--radius-pill);
+      border-radius: var(--radius-pill);
       display: flex; align-items: center; justify-content: space-between;
       padding: 10px 14px; box-shadow: var(--tabbar-shadow);
       pointer-events: auto;
@@ -273,10 +273,15 @@
       color: var(--tab-icon-inactive);
       transition: background var(--ease), color var(--ease), transform var(--ease);
     }
-    .tab svg { width: 22px; height: 22px; stroke-width: 1.8; }
+    .tab svg { width: 22px; height: 22px; }
     .tab span { font: var(--t-xs); color: var(--tab-label-inactive); }
     .tab:active { transform: scale(1.05); }
-    .tab.active { background: var(--tab-active-pill-bg); color: var(--tab-icon-active); }
+    .tab.active {
+      background: var(--tab-active-pill-bg);
+      border: 1px solid var(--tab-active-pill-border);
+      border-radius: var(--radius-full);
+      color: var(--tab-icon-active);
+    }
     .tab.active span { color: var(--tab-label-active); }
     .tab-plus {
       flex-shrink: 0; width: 52px; height: 52px; border-radius: var(--radius-full);
@@ -679,11 +684,33 @@
 
     <div class="tabbar-wrap">
       <nav class="tabbar">
-        <button class="tab active"><i data-lucide="clipboard-list"></i><span>Handover</span></button>
-        <button class="tab"><i data-lucide="history"></i><span>History</span></button>
+        <button class="tab active">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <rect x="2"    y="11" width="5.5" height="10" rx="1.5" fill="currentColor"/>
+            <rect x="9.25" y="6"  width="5.5" height="15" rx="1.5" fill="currentColor"/>
+            <rect x="16.5" y="2"  width="5.5" height="19" rx="1.5" fill="currentColor"/>
+          </svg>
+          <span>Handover</span>
+        </button>
+        <button class="tab">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zM12.75 6a.75.75 0 00-1.5 0v6c0 .414.336.75.75.75h4.5a.75.75 0 000-1.5h-3.75V6z"/>
+          </svg>
+          <span>History</span>
+        </button>
         <button class="tab-plus" data-open-sheet="task"><i data-lucide="plus"></i></button>
-        <button class="tab"><i data-lucide="users"></i><span>Team</span></button>
-        <button class="tab"><i data-lucide="user"></i><span>Profile</span></button>
+        <button class="tab">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M4.5 6.375a4.125 4.125 0 118.25 0 4.125 4.125 0 01-8.25 0zM14.25 8.625a3.375 3.375 0 116.75 0 3.375 3.375 0 01-6.75 0zM1.5 19.125a7.125 7.125 0 0114.25 0v.003l-.001.119a.75.75 0 01-.363.63 13.067 13.067 0 01-6.761 1.873c-2.472 0-4.786-.684-6.76-1.873a.75.75 0 01-.364-.63l-.001-.122zM17.25 19.128l-.001.144a2.25 2.25 0 01-.233.96 10.088 10.088 0 005.06-1.01.75.75 0 00.42-.643 4.875 4.875 0 00-6.957-4.611 8.586 8.586 0 011.71 5.157v.003z"/>
+          </svg>
+          <span>Team</span>
+        </button>
+        <button class="tab">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path fill-rule="evenodd" clip-rule="evenodd" d="M7.5 6a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM3.751 20.105a8.25 8.25 0 0116.498 0 .75.75 0 01-.437.695A18.683 18.683 0 0112 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 01-.437-.695z"/>
+          </svg>
+          <span>Profile</span>
+        </button>
       </nav>
     </div>
 
@@ -825,7 +852,9 @@
         notes: [
           { id: 1, author: 'MK', avatarColor: '#2A2A4A', title: '', text: 'Guy coming back at 17:00 to pay for his americano — he had a large one. He was wearing a black jacket and a red hat with a pink scarf. Friendly.' }
         ],
-        reports: []
+        reports: [
+          { id: 1, title: 'Oat milk — almost out', category: 'Stock', description: '' }
+        ]
       },
       taskLibrary: {
         Cleaning: [
@@ -1033,22 +1062,21 @@
       li.dataset.reportId = report.id;
       li.dataset.expandable = 'true';
       const icon = reportIcon(report.category);
-      const variant = reportIconVariant(report.category);
       li.innerHTML = `
         <div class="row-delete-bg"><i data-lucide="trash-2"></i></div>
         <div class="row-swipe">
-          <div class="row-main">
-            <span class="icon">${catIconEl(icon)}</span>
-            <div class="row-label">
-              <div class="row-label-top">
+          <span class="icon">${catIconEl(icon)}</span>
+          <div class="row-body">
+            <div class="row-main">
+              <div class="row-label">
                 <span class="label">${esc(report.title)}</span>
+                <span class="row-cat">${esc(report.category)}</span>
               </div>
-              <span class="row-cat">${esc(report.category)}</span>
             </div>
+            ${hasDesc
+              ? `<div class="row-detail"><span class="row-detail-text">${esc(report.description)}</span></div>`
+              : `<div class="row-detail"><div class="row-detail-wrapper"><input class="row-detail-input" type="text" placeholder="Add details (optional)" data-detail-report-id="${report.id}" value="${esc(report.description ?? '')}" /></div></div>`}
           </div>
-          ${hasDesc
-            ? `<div class="row-detail"><span class="row-detail-text">${esc(report.description)}</span></div>`
-            : `<div class="row-detail"><input class="row-detail-input" type="text" placeholder="Add details (optional)" data-detail-report-id="${report.id}" value="${esc(report.description)}" /></div>`}
         </div>`;
       return li;
     }
