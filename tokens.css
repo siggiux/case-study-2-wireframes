@@ -22,11 +22,16 @@
   --warm-100: #F6E2CD;
   --warm-200: #F3D9BE;
   --warm-300: #EFCBA6;
+  --warm-400: #F5C185;   /* saturated peach — celebration wash */
+
+  /* --- Color: Brown (warm text accent) --- */
+  --brown-800: #583102;  /* deep warm brown — celebration headings */
 
   /* --- Color: Blue (accent family) --- */
   --blue-50:  #E8EAFC;
   --blue-100: #D5D9F8;
   --blue-200: #B0B7F0;
+  --blue-350: #6B78FF;   /* bright periwinkle — dark-mode accent */
   --blue-400: #6470E8;
   --blue-500: #4D5BE3;
   --blue-600: #3A45B0;
@@ -45,6 +50,12 @@
   --neutral-800:  #2B2622;
   --neutral-900:  #1C1916;
   --neutral-950:  #121010;
+
+  /* --- Color: Teal (dark-mode surface family) --- */
+  --teal-900: #124649;   /* deepest teal — gradient top / page */
+  --teal-800: #165655;   /* mid teal — raised surfaces / gradient */
+  --teal-700: #4A7578;   /* muted teal — checkbox / inverse surface */
+  --teal-600: #427F7D;   /* brighter teal — gradient base */
 
   /* --- Color: Functional --- */
   --amber-100: #FBF0E2;
@@ -155,6 +166,7 @@
 
   /* --- Glass surfaces (glassmorphism — opacity baked in) --- */
   --color-surface-glass:             rgba(250, 251, 254, 0.20); /* card default bg  */
+  --color-surface-glass-raised:      rgba(250, 251, 254, 0.50); /* raised glass card */
   --color-surface-glass-active:      rgba(243, 245, 252, 0.74); /* card clicked bg  */
   --color-surface-icon-tile:         rgba(0, 0, 0, 0.05); /* icon tile default */
   --color-surface-icon-tile-active:  rgba(0, 0, 0, 0.10); /* icon tile clicked */
@@ -168,11 +180,17 @@
   --color-background-gradient-3: var(--warm-25);
   --color-background-gradient-4: var(--neutral-0);
 
+  /* --- Confirm gradient (celebration wash — warmer than app shell) --- */
+  --color-confirm-gradient-top: var(--warm-400);
+  --color-confirm-gradient-mid: var(--warm-40);
+  --color-confirm-gradient-end: var(--warm-25);
+
   /* --- Text --- */
   --color-text-primary:   var(--neutral-800);
   --color-text-secondary: var(--neutral-400);
   --color-text-tertiary:  var(--neutral-300);
   --color-text-subdued:   var(--neutral-700);   /* mid-tone: between primary and secondary */
+  --color-text-warm-strong: var(--brown-800);   /* warm heading on celebration wash */
   --color-text-on-accent: var(--neutral-0);
 
   /* --- Accent --- */
@@ -201,6 +219,12 @@
   --color-accent-pulse-start: rgba(77, 91, 227, 0);    /* pulse ring keyframe — invisible */
   --color-accent-pulse-end:   rgba(77, 91, 227, 0.22); /* pulse ring keyframe — visible */
   --color-on-accent-scrim:    rgba(255, 255, 255, 0.22); /* translucent fill on accent surfaces */
+
+  /* --- Component surfaces (theme-aware; warm in light → cool in dark) --- */
+  --color-finish-surface:       var(--warm-40);                /* Done-button fill */
+  --color-finish-surface-hover: var(--warm-75);
+  --color-tabbar-surface:       rgba(250, 251, 254, 0.45);     /* floating tab bar glass */
+  --color-summary-add-surface:  var(--color-surface-glass-active); /* confirm "add another" */
 }
 
 
@@ -211,23 +235,29 @@
    ============================================ */
 [data-theme="dark"] {
 
-  /* --- Background --- */
-  --color-background-header-start: var(--neutral-900);
-  --color-background-header-end:   var(--neutral-950);
-  --color-background-page:         var(--neutral-950);
-  --color-surface-raised:          var(--neutral-900);
-  --color-surface-raised-hover:    var(--neutral-800);
-  --color-surface-inverse:         var(--neutral-800);
+  /* --- Background (teal surface family) --- */
+  --color-background-header-start: var(--teal-900);
+  --color-background-header-end:   var(--teal-800);
+  --color-background-page:         var(--teal-900);
+  --color-surface-raised:          var(--teal-800);
+  --color-surface-raised-hover:    var(--teal-700);
+  --color-surface-inverse:         var(--teal-700);   /* #4A7578 — checkbox fill */
 
-  /* --- Background gradient (warm wash → page) --- */
-  --color-background-gradient-1: var(--neutral-800);
-  --color-background-gradient-2: var(--neutral-900);
-  --color-background-gradient-3: var(--neutral-900);
-  --color-background-gradient-4: var(--neutral-950);
+  /* --- Background gradient (teal wash: #124649 → #165655 → #427F7D) --- */
+  --color-background-gradient-1: var(--teal-900);
+  --color-background-gradient-2: var(--teal-900);
+  --color-background-gradient-3: var(--teal-800);
+  --color-background-gradient-4: var(--teal-600);
 
-  /* --- Glass surfaces --- */
-  --color-surface-glass:             rgba(28, 25, 22, 0.40);  /* card default bg  */
-  --color-surface-glass-active:      rgba(43, 38, 34, 0.80);  /* card clicked bg  */
+  /* --- Confirm gradient (same teal wash) --- */
+  --color-confirm-gradient-top: var(--teal-900);
+  --color-confirm-gradient-mid: var(--teal-800);
+  --color-confirm-gradient-end: var(--teal-600);
+
+  /* --- Glass surfaces (light film over teal) --- */
+  --color-surface-glass:             rgba(250, 251, 254, 0.10);  /* card default bg  */
+  --color-surface-glass-raised:      rgba(250, 251, 254, 0.18);  /* raised glass card */
+  --color-surface-glass-active:      rgba(250, 251, 254, 0.20);  /* card clicked bg  */
   --color-surface-icon-tile:         rgba(255, 255, 255, 0.08);
   --color-surface-icon-tile-active:  rgba(255, 255, 255, 0.14);
 
@@ -239,14 +269,15 @@
   --color-text-secondary: var(--neutral-300);
   --color-text-tertiary:  var(--neutral-400);
   --color-text-subdued:   var(--neutral-200);   /* mid-tone in dark mode */
+  --color-text-warm-strong: var(--warm-50);     /* #FBF4EC — confirm heading on teal */
   --color-text-on-accent: var(--neutral-0);
 
-  /* --- Accent --- */
-  --color-accent:          var(--blue-400);
-  --color-accent-hover:    var(--blue-500);
-  --color-accent-soft:     rgba(77, 91, 227, 0.18);
-  --color-accent-line:     var(--blue-400);
-  --color-accent-line-off: rgba(100, 112, 232, 0.25);
+  /* --- Accent (brighter periwinkle on teal) --- */
+  --color-accent:          var(--blue-350);   /* #6B78FF */
+  --color-accent-hover:    var(--blue-400);
+  --color-accent-soft:     rgba(107, 120, 255, 0.18);
+  --color-accent-line:     var(--blue-350);
+  --color-accent-line-off: rgba(107, 120, 255, 0.25);
 
   /* --- Functional --- */
   --color-warning:      var(--amber-500);
@@ -264,9 +295,15 @@
   --color-backdrop:    var(--neutral-950);
   --color-accent-ring: rgba(100, 112, 232, 0.40);
   --color-overlay:     rgba(0, 0, 0, 0.60);
-  --color-accent-pulse-start: rgba(100, 112, 232, 0);
-  --color-accent-pulse-end:   rgba(100, 112, 232, 0.30);
+  --color-accent-pulse-start: rgba(107, 120, 255, 0);
+  --color-accent-pulse-end:   rgba(107, 120, 255, 0.30);
   --color-on-accent-scrim:    rgba(255, 255, 255, 0.22);
+
+  /* --- Component surfaces (theme-aware; warm in light → cool in dark) --- */
+  --color-finish-surface:       rgba(160, 164, 208, 0.12);  /* Done-button fill */
+  --color-finish-surface-hover: rgba(160, 164, 208, 0.20);
+  --color-tabbar-surface:       rgba(123, 123, 123, 0.45);  /* floating tab bar glass */
+  --color-summary-add-surface:  rgba(77, 91, 227, 0.05);    /* confirm "add another" */
 }
 
 
@@ -292,14 +329,14 @@
 
   /* --- Header --- */
   --header-title-color:      var(--color-text-primary);
-  --menu-button-bg:          rgba(255, 255, 255, 0.55);
+  --header-avatar-bg:        #f5c185;           /* warm amber backdrop for avatar image */
 
-  /* --- Finish/handover button --- */
-  --finish-button-bg:        var(--color-accent);
-  --finish-button-text:      var(--color-text-on-accent);
-  --finish-button-shadow:    var(--shadow-accent);
-  --finish-button-pulse-from: var(--color-accent-pulse-start);
-  --finish-button-pulse-to:   var(--color-accent-pulse-end);
+  /* --- Done button --- */
+  --finish-button-bg:        var(--color-finish-surface);
+  --finish-button-bg-hover:  var(--color-finish-surface-hover);
+  --finish-button-text:      var(--color-text-secondary);
+  --finish-button-border:    var(--color-border-subtle);
+  --finish-button-shadow:    0 1px 2px rgba(0, 0, 0, 0.10);
 
   /* --- Section header --- */
   --section-title-color:     var(--color-text-primary);
@@ -356,7 +393,7 @@
   --normalising-text-color:  var(--color-text-tertiary);
 
   /* --- Tab bar --- */
-  --tabbar-bg:               rgba(250, 251, 254, 0.45);  /* near-white semi-transparent */
+  --tabbar-bg:               var(--color-tabbar-surface);  /* near-white in light, grey-teal in dark */
   --tabbar-blur:             var(--blur-sm);             /* glass effect — Figma GLASS radius 10 */
   --tabbar-shadow:           var(--shadow-float);
   --tab-icon-inactive:       var(--color-text-subdued);  /* #444342 — mid-tone neutral */
@@ -427,12 +464,26 @@
   --menu-avatar-bg:          var(--color-accent);
   --menu-avatar-text:        var(--color-text-on-accent);
 
-  /* --- Confirm screen --- */
-  --confirm-bg:              var(--color-background-page);
-  --summary-card-bg:         var(--color-surface-raised);
+  /* --- Confirm screen (final handover) --- */
+  --confirm-bg:              linear-gradient(
+                               180deg,
+                               var(--color-confirm-gradient-top) 0%,
+                               var(--color-confirm-gradient-mid) 52%,
+                               var(--color-confirm-gradient-end) 100%
+                             );
+  --confirm-title:           var(--color-text-warm-strong);
+  --confirm-body:            var(--color-text-subdued);
+  --confirm-section:         var(--color-text-warm-strong);
+  --summary-card-bg:         var(--color-surface-glass-raised);
   --summary-card-border:     var(--color-border-subtle);
-  --summary-add-bg:          var(--color-accent-soft);
-  --summary-add-text:        var(--color-accent);
+  --summary-tile-bg:         var(--color-surface-icon-tile);
+  --summary-count:           var(--color-text-primary);
+  --summary-label:           var(--color-text-primary);
+  --summary-add-bg:          var(--color-summary-add-surface);
+  --summary-add-text:        var(--color-text-primary);
+  --summary-add-shadow:      var(--shadow-card);
+  --summary-finish-bg:       var(--color-accent);
+  --summary-finish-text:     var(--color-text-on-accent);
 
   /* --- Done screen --- */
   --done-bg:                 var(--color-background-page);

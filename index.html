@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="./tokens.css?v=3" />
+  <link rel="stylesheet" href="./tokens.css?v=6" />
   <style>
     *, *::before, *::after { box-sizing: border-box; }
     html, body { margin: 0; padding: 0; }
@@ -69,30 +69,27 @@
     .header-left { display: flex; align-items: center; gap: 12px; }
     .header h1 { margin: 0; font: var(--t-h1); letter-spacing: -0.02em; color: var(--header-title-color); }
 
-    /* hamburger button */
-    .btn-menu {
-      display: grid; place-items: center; width: 40px; height: 40px;
-      border-radius: var(--radius-md); color: var(--color-text-primary);
-      background: var(--menu-button-bg); border: 0.5px solid var(--color-border-subtle);
-      transition: background var(--ease);
+    /* header avatar — replaces hamburger; clicking opens the menu drawer */
+    .header-avatar {
+      display: block; width: 43px; height: 43px;
+      border-radius: var(--radius-full); overflow: hidden;
+      background: var(--header-avatar-bg);
+      flex-shrink: 0; padding: 0; border: none; cursor: pointer;
     }
-    .btn-menu:hover { background: var(--color-surface-raised-hover); }
-    .btn-menu svg { width: 18px; height: 18px; }
+    .header-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+    /* Done button */
     .btn-finish {
-      color: var(--finish-button-text); border: none;
-      border-radius: var(--radius-md); padding: 11px 18px;
+      color: var(--finish-button-text);
       background: var(--finish-button-bg);
-      font: var(--font-weight-semibold) var(--font-size-md)/1 var(--font);
-      box-shadow: var(--finish-button-pressed-shadow);
+      border: 1px solid var(--finish-button-border);
+      border-radius: 14px; padding: 6px 18px;
+      font: var(--t-body);
+      box-shadow: var(--finish-button-shadow);
       transition: transform var(--ease), background var(--ease);
     }
-    .btn-finish:hover { background: var(--color-accent-hover); }
+    .btn-finish:hover { background: var(--finish-button-bg-hover); }
     .btn-finish:active { transform: scale(0.97); }
-    .btn-finish.pulse { animation: pulse 1.8s ease-in-out 2; }
-    @keyframes pulse {
-      0%,100% { box-shadow: 0 0 0 0 var(--finish-button-pulse-from); }
-      50% { box-shadow: 0 0 0 8px var(--finish-button-pulse-to); }
-    }
 
     /* sections — transparent groupings on white */
     .section { margin-bottom: 28px; }
@@ -245,7 +242,7 @@
       border: 1.5px dashed var(--add-button-border); border-radius: var(--card-radius);
       padding: 14px; font: var(--t-action); color: var(--add-button-text);
       display: flex; align-items: center; justify-content: center; gap: 8px;
-      margin-top: 2px; transition: background var(--ease);
+      margin-top: 10px; transition: background var(--ease);
     }
     .btn-add:hover { background: var(--add-button-bg-hover); }
     .btn-add:active { transform: scale(0.99); }
@@ -259,7 +256,12 @@
     .tabbar-wrap {
       position: absolute; left: 0; right: 0; bottom: 0;
       padding: 0 16px 20px; z-index: 20; pointer-events: none;
+      transition: opacity var(--ease);
     }
+    .tabbar-wrap.sheet-open { opacity: 0; pointer-events: none; }
+    /* child .tabbar sets pointer-events:auto; override it so the hidden
+       tabbar can't intercept clicks on the sheet's submit button */
+    .tabbar-wrap.sheet-open .tabbar { pointer-events: none; }
     .tabbar {
       background: var(--tabbar-bg);
       -webkit-backdrop-filter: blur(var(--tabbar-blur));
@@ -315,13 +317,16 @@
     .sheet-foot-hint { font: var(--font-weight-regular) var(--font-size-sm)/1.4 var(--font); font-style: italic; color: var(--normalising-text-color); text-align: center; padding: 0 16px 8px; }
 
     .search-wrap { position: relative; margin-bottom: 18px; }
+    .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; color: var(--color-text-secondary); pointer-events: none; z-index: 1; }
+    .search-icon svg { width: 16px; height: 16px; }
+    .search-wrap.active .search-icon { display: none; }
     .search-back { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 24px; height: 24px; background: transparent; border: none; color: var(--color-text-secondary); display: none; align-items: center; justify-content: center; cursor: pointer; z-index: 1; padding: 0; transition: color var(--ease); }
     .search-back svg { width: 18px; height: 18px; }
     .search-back:hover { color: var(--color-text-primary); }
     .search-wrap.active .search-back { display: flex; }
     .search {
       width: 100%; background: var(--input-bg); border: 1px solid var(--input-border);
-      color: var(--input-text); border-radius: var(--radius-md); padding: 12px 14px;
+      color: var(--input-text); border-radius: var(--radius-md); padding: 12px 14px 12px 40px;
       font: var(--t-body-r); outline: none;
       transition: border-color var(--ease), box-shadow var(--ease), padding-left var(--ease);
     }
@@ -384,6 +389,17 @@
     }
     .btn-primary:active { transform: scale(0.99); }
     .btn-primary[disabled] { opacity: 0.4; cursor: not-allowed; }
+    .btn-secondary {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 8px 14px; background: var(--blue-400);
+      border: 1px solid var(--blue-400); border-radius: 999px;
+      color: var(--color-text-on-accent); font: var(--t-sm);
+      white-space: nowrap; cursor: pointer;
+      transition: background var(--ease), border-color var(--ease);
+    }
+    .btn-secondary svg { width: 13px; height: 13px; stroke-width: 2.5; flex-shrink: 0; }
+    .btn-secondary:hover { background: var(--color-accent); border-color: var(--color-accent); }
+    .btn-secondary:active { transform: scale(0.99); }
     .badge { display: inline-flex; align-items: center; justify-content: center; min-width: 22px; height: 22px; padding: 0 6px; background: var(--badge-bg); border-radius: var(--radius-full); font: var(--font-weight-semibold) var(--font-size-12)/1 var(--font); }
 
     .field { display: block; margin-bottom: 14px; }
@@ -433,60 +449,110 @@
     .confirm-screen.open { transform: translateY(0); }
     .confirm-content {
       flex: 1;
-      padding: 56px 24px 28px;
+      padding: 60px 24px 16px;
       display: flex; flex-direction: column;
       overflow-y: auto;
     }
-    .confirm-intro {
-      font: italic var(--font-weight-regular) var(--font-size-2xl)/1.35 var(--font);
-      color: var(--color-text-secondary);
+    .confirm-title {
+      font: var(--font-weight-bold) var(--font-size-28)/1.2 var(--font);
+      letter-spacing: -0.02em;
+      color: var(--confirm-title);
       text-align: center;
       margin: 0;
     }
-    .confirm-section { margin-top: auto; }
-    .confirm-section h2 { font: var(--t-h1); color: var(--color-text-primary); margin: 0 0 14px; }
+    /* hero illustration — avatar + ambient decorations */
+    .confirm-hero {
+      position: relative;
+      align-self: center;
+      width: 220px; height: 200px;
+      margin: 6px 0 4px;
+      display: grid; place-items: center;
+    }
+    .confirm-avatar {
+      width: 188px; height: 188px;
+      object-fit: contain;
+      display: block;
+    }
+    .confirm-deco {
+      position: absolute;
+      font-size: 20px; line-height: 1;
+      opacity: 0.85;
+      pointer-events: none;
+      user-select: none;
+    }
+    .confirm-deco.d1 { top: 8px;   left: 14px;  font-size: 18px; transform: rotate(-12deg); }
+    .confirm-deco.d2 { top: 2px;   right: 22px; font-size: 22px; transform: rotate(10deg); }
+    .confirm-deco.d3 { top: 70px;  right: 4px;  font-size: 16px; opacity: 0.7; }
+    .confirm-deco.d4 { bottom: 24px; left: 2px; font-size: 17px; transform: rotate(-8deg); opacity: 0.75; }
+    .confirm-body {
+      font: var(--font-weight-regular) var(--font-size-lg)/1.5 var(--font);
+      color: var(--confirm-body);
+      text-align: center;
+      max-width: 300px;
+      margin: 4px auto 0;
+    }
+    .confirm-section { margin-top: 28px; }
+    .confirm-section h2 {
+      font: var(--font-weight-bold) var(--font-size-lg)/1.3 var(--font);
+      color: var(--confirm-section);
+      margin: 0 0 12px;
+    }
     .summary-card {
-      display: flex; align-items: center; gap: 14px;
+      display: flex; align-items: center; gap: 12px;
       background: var(--summary-card-bg);
       border: 1px solid var(--summary-card-border);
-      border-radius: var(--radius-md);
-      padding: 14px 16px;
+      border-radius: var(--radius-lg);
+      padding: 10px 12px;
       margin-bottom: 10px;
+      -webkit-backdrop-filter: blur(var(--blur-sm));
+      backdrop-filter: blur(var(--blur-sm));
     }
     .summary-card:last-of-type { margin-bottom: 0; }
-    .summary-count {
-      font: var(--font-weight-semibold) var(--font-size-17)/1 var(--font);
-      color: var(--color-text-primary);
-      min-width: 14px;
+    .summary-tile {
+      flex-shrink: 0;
+      width: 36px; height: 36px;
+      display: grid; place-items: center;
+      background: var(--summary-tile-bg);
+      border-radius: var(--radius-sm);
+      font-size: 18px; line-height: 1;
     }
-    .summary-label {
+    .summary-count {
       flex: 1;
-      font: var(--t-body);
-      color: var(--color-text-primary);
+      font: var(--font-weight-semibold) var(--font-size-md)/1.2 var(--font);
+      color: var(--summary-count);
     }
     .summary-add {
+      display: inline-flex; align-items: center; gap: 4px;
       font: var(--font-weight-medium) var(--font-size-md)/1 var(--font);
-      color: var(--color-accent);
-      padding: 8px 16px;
-      border-radius: var(--radius-sm);
-      background: var(--summary-add-bg);
-      transition: background var(--ease);
-    }
-    .summary-add:hover { background: var(--color-accent-soft); }
-    .confirm-actions { display: flex; gap: 12px; margin-top: 28px; }
-    .btn-back, .btn-finish-shift {
-      flex: 1;
-      padding: 14px 12px;
+      color: var(--summary-add-text);
+      padding: 8px 14px;
       border-radius: var(--radius-full);
-      font: var(--t-action);
-      transition: background var(--ease), border-color var(--ease), transform var(--ease);
+      background: var(--summary-add-bg);
+      box-shadow: var(--summary-add-shadow);
+      transition: transform var(--ease), background var(--ease);
       cursor: pointer;
     }
-    .btn-back { background: transparent; border: 1px solid var(--color-border-subtle); color: var(--color-text-primary); }
-    .btn-back:hover { background: var(--color-surface-raised); border-color: var(--color-border-accent); }
-    .btn-finish-shift { background: var(--color-accent); color: var(--color-text-on-accent); border: 1px solid var(--color-accent); }
+    .summary-add svg { width: 13px; height: 13px; }
+    .summary-add:hover { background: var(--color-surface-glass-raised); }
+    .summary-add:active { transform: scale(0.96); }
+    .confirm-footer {
+      flex-shrink: 0;
+      padding: 12px 24px calc(24px + env(safe-area-inset-bottom));
+    }
+    .btn-finish-shift {
+      width: 100%;
+      padding: 15px 12px;
+      border-radius: var(--radius-md);
+      font: var(--t-action);
+      background: var(--summary-finish-bg);
+      color: var(--summary-finish-text);
+      border: none;
+      box-shadow: var(--shadow-finish);
+      transition: background var(--ease), transform var(--ease);
+      cursor: pointer;
+    }
     .btn-finish-shift:hover { background: var(--color-accent-hover); }
-    .btn-back:active, .btn-finish-shift:active { transform: scale(0.98); }
+    .btn-finish-shift:active { transform: scale(0.98); }
 
     /* ===== shift done screen ===== */
     .done-screen {
@@ -637,12 +703,12 @@
       </div>
       <header class="header">
         <div class="header-left">
-          <button class="btn-menu" id="btn-menu" aria-label="Open menu" aria-expanded="false" aria-controls="menu-drawer">
-            <i data-lucide="menu"></i>
+          <button class="header-avatar" id="btn-menu" aria-label="Open menu" aria-expanded="false" aria-controls="menu-drawer">
+            <img src="icons/Avatar.svg" alt="" aria-hidden="true" />
           </button>
-          <h1>The handover</h1>
+          <h1>My handover</h1>
         </div>
-        <button class="btn-finish pulse" type="button">Hand over</button>
+        <button class="btn-finish" type="button">Done</button>
       </header>
     </div>
 
@@ -729,6 +795,7 @@
       <!-- Add task panel -->
       <div class="sheet-body" data-sheet-panel="task">
         <div class="search-wrap" id="task-search-wrap">
+          <span class="search-icon" aria-hidden="true"><i data-lucide="search"></i></span>
           <button class="search-back" id="task-search-back" aria-label="Back"><i data-lucide="arrow-left"></i></button>
           <input class="search" type="search" id="task-search" placeholder="Search tasks…" autocomplete="off" />
         </div>
@@ -739,9 +806,6 @@
       <div class="sheet-body hidden" data-sheet-panel="note">
         <div class="sheet-section-title">Leave a note for the next shift</div>
         <div class="field">
-          <input type="text" id="note-title" placeholder="Note title (optional)" />
-        </div>
-        <div class="field">
           <textarea id="note-message" class="tall" rows="6" placeholder="Your message…"></textarea>
         </div>
       </div>
@@ -749,6 +813,7 @@
       <!-- Add report panel -->
       <div class="sheet-body hidden" data-sheet-panel="report">
         <div class="search-wrap" id="report-search-wrap">
+          <span class="search-icon" aria-hidden="true"><i data-lucide="search"></i></span>
           <button class="search-back" id="report-search-back" aria-label="Back"><i data-lucide="arrow-left"></i></button>
           <input class="search" type="search" id="report-search" placeholder="Search reports…" autocomplete="off" />
         </div>
@@ -768,29 +833,36 @@
     <!-- Finish handover — confirmation screen -->
     <div class="confirm-screen" id="confirm-screen" aria-hidden="true">
       <div class="confirm-content">
-        <p class="confirm-intro">Ready to hand over?<br>Here's what you're passing on.</p>
+        <h1 class="confirm-title">Ready to hand over?</h1>
+        <div class="confirm-hero">
+          <span class="confirm-deco d1" aria-hidden="true">🍃</span>
+          <span class="confirm-deco d2" aria-hidden="true">✨</span>
+          <span class="confirm-deco d3" aria-hidden="true">☕</span>
+          <span class="confirm-deco d4" aria-hidden="true">🥐</span>
+          <img class="confirm-avatar" src="icons/avatar_coffee.svg" alt="Barista taking a coffee break">
+        </div>
+        <p class="confirm-body">If you are sure you did not forget anything, go on and enjoy the rest of your day 😀</p>
         <div class="confirm-section">
           <h2>Your handover</h2>
           <div class="summary-card">
-            <span class="summary-count" id="confirm-tasks-count">0</span>
-            <span class="summary-label">Tasks</span>
-            <button class="summary-add" data-confirm-add="task">Add</button>
+            <span class="summary-tile" aria-hidden="true">📦</span>
+            <span class="summary-count" id="confirm-tasks-count">0 tasks</span>
+            <button class="summary-add" data-confirm-add="task"><i data-lucide="plus"></i>Add</button>
           </div>
           <div class="summary-card">
-            <span class="summary-count" id="confirm-notes-count">0</span>
-            <span class="summary-label">Notes</span>
-            <button class="summary-add" data-confirm-add="note">Add</button>
+            <span class="summary-tile" aria-hidden="true">📕</span>
+            <span class="summary-count" id="confirm-notes-count">0 notes</span>
+            <button class="summary-add" data-confirm-add="note"><i data-lucide="plus"></i>Add</button>
           </div>
           <div class="summary-card">
-            <span class="summary-count" id="confirm-reports-count">0</span>
-            <span class="summary-label">Report</span>
-            <button class="summary-add" data-confirm-add="report">Add</button>
+            <span class="summary-tile" aria-hidden="true">👥</span>
+            <span class="summary-count" id="confirm-reports-count">0 reports</span>
+            <button class="summary-add" data-confirm-add="report"><i data-lucide="plus"></i>Add</button>
           </div>
         </div>
-        <div class="confirm-actions">
-          <button class="btn-back" id="confirm-back">Back</button>
-          <button class="btn-finish-shift" id="confirm-finish">Finish shift</button>
-        </div>
+      </div>
+      <div class="confirm-footer">
+        <button class="btn-finish-shift" id="confirm-finish">Finish shift</button>
       </div>
     </div>
 
@@ -951,11 +1023,11 @@
     };
 
     /* ===== HELPERS ===== */
-    const TASK_ICONS = { Cleaning: 'icons/clean.svg', Stock: 'icons/stock.svg', Equipment: 'icons/equipment.svg', Prep: 'icons/prep.svg', Admin: 'icons/admin.svg', Other: 'icons/other.svg' };
-    const REPORT_ICONS = { Complaints: 'icons/complaints.svg', Till: 'icons/till.svg', Injury: 'icons/injury.svg', Stock: 'icons/stock.svg', Other: 'icons/other.svg' };
+    const TASK_ICONS = { Cleaning: 'icons/clean.svg', Stock: 'icons/stock.svg', Equipment: 'icons/equipment.svg', Prep: 'icons/prep.svg', Admin: 'icons/admin.svg' };
+    const REPORT_ICONS = { Complaints: 'icons/complaints.svg', Till: 'icons/till.svg', Injury: 'icons/injury.svg', Stock: 'icons/stock.svg' };
     const REPORT_NOUN = { Complaints: 'complaint', Till: 'till', Injury: 'injury', Stock: 'stock' };
-    const TASK_CATEGORIES = ['Cleaning', 'Stock', 'Equipment', 'Prep', 'Admin', 'Other'];
-    const REPORT_CATEGORIES = ['Complaints', 'Till', 'Injury', 'Stock', 'Other'];
+    const TASK_CATEGORIES = ['Cleaning', 'Stock', 'Equipment', 'Prep', 'Admin'];
+    const REPORT_CATEGORIES = ['Complaints', 'Till', 'Injury', 'Stock'];
 
     function taskIcon(cat) { return TASK_ICONS[cat] || TASK_ICONS.Other; }
     function reportIcon(cat) { return REPORT_ICONS[cat] || REPORT_ICONS.Other; }
@@ -994,6 +1066,8 @@
       activeReportCat: null,
       oneOffTaskMode: false,
       oneOffReportMode: false,
+      defaultOneOffTask: false,
+      defaultOneOffReport: false,
       editingNoteId: null,
       searchQuery: '',
       reportSearchQuery: '',
@@ -1007,7 +1081,6 @@
       otherTaskDetails: '',
       otherReportTitle: '',
       otherReportDetails: '',
-      noteTitle: '',
       noteMessage: ''
     };
 
@@ -1049,7 +1122,7 @@
       li.innerHTML = `
         <div class="row-delete-bg"><i data-lucide="trash-2"></i></div>
         <div class="row-swipe">
-          <div class="avatar"><img src="icons/Avatar.png" alt="" class="avatar-img"></div>
+          <div class="avatar"><img src="icons/Avatar.svg" alt="" class="avatar-img"></div>
           <p class="note-body">${esc(note.text)}</p>
           <button class="edit" data-note-id="${note.id}">edit</button>
         </div>`;
@@ -1150,13 +1223,14 @@
         </li>`;
     }
 
-    function chipsHTML(categories, active, attr, iconsMap) {
+    function chipsHTML(categories, active, attr, iconsMap, trailingHTML = '') {
       let html = '<div class="chips">';
       categories.forEach(c => {
         const iconSrc = iconsMap ? iconsMap[c] : null;
         const iconEl = iconSrc ? catIconEl(iconSrc) : '';
         html += `<button class="chip${active === c ? ' active' : ''}" ${attr}="${esc(c)}">${iconEl}${esc(c)}</button>`;
       });
+      html += trailingHTML;
       html += '</div>';
       return html;
     }
@@ -1242,9 +1316,9 @@
         return;
       }
 
-      // Other chip selected — form only
-      if (cat === 'Other') {
-        html += chipsHTML(TASK_CATEGORIES, cat, 'data-cat', TASK_ICONS);
+      // Default one-off (no category selected)
+      if (ui.defaultOneOffTask) {
+        html += chipsHTML(TASK_CATEGORIES, null, 'data-cat', TASK_ICONS);
         html += taskOneOffFormHTML();
         container.innerHTML = html;
         icons();
@@ -1276,7 +1350,7 @@
       }
 
       // Default — chips, Common section (frequency ordered), then full library
-      html += chipsHTML(TASK_CATEGORIES, cat, 'data-cat', TASK_ICONS);
+      html += chipsHTML(TASK_CATEGORIES, cat, 'data-cat', TASK_ICONS, `<button class="btn-secondary" data-default-oneoff="task"><i data-lucide="plus"></i>One-off</button>`);
       const commonTaskItems = state.commonTasks.map(id => findLibraryTask(id)).filter(Boolean).sort(byFreq);
       html += `<div class="sheet-section-title">Common</div><ul>`;
       commonTaskItems.forEach(t => { html += pickRowHTML(t.id, t.title, 'task', t.category); });
@@ -1347,8 +1421,9 @@
         return;
       }
 
-      if (cat === 'Other') {
-        html += chipsHTML(REPORT_CATEGORIES, cat, 'data-report-cat', REPORT_ICONS);
+      // Default one-off (no category selected)
+      if (ui.defaultOneOffReport) {
+        html += chipsHTML(REPORT_CATEGORIES, null, 'data-report-cat', REPORT_ICONS);
         html += reportOneOffFormHTML(null);
         container.innerHTML = html;
         icons();
@@ -1380,7 +1455,7 @@
       }
 
       // Default — chips, Common section (frequency ordered), then full library
-      html += chipsHTML(REPORT_CATEGORIES, cat, 'data-report-cat', REPORT_ICONS);
+      html += chipsHTML(REPORT_CATEGORIES, cat, 'data-report-cat', REPORT_ICONS, `<button class="btn-secondary" data-default-oneoff="report"><i data-lucide="plus"></i>One-off</button>`);
       const commonReportItems = state.commonReports.map(id => findLibraryReport(id)).filter(Boolean).sort(byFreq);
       html += `<div class="sheet-section-title">Common</div><ul>`;
       commonReportItems.forEach(r => { html += pickRowHTML(r.id, r.title, 'report', r.category); });
@@ -1407,7 +1482,7 @@
       let enabled = false, count = 0;
 
       if (which === 'task') {
-        const inOneOff = ui.activeCat === 'Other' || (ui.activeCat && ui.oneOffTaskMode);
+        const inOneOff = ui.defaultOneOffTask || (ui.activeCat && ui.oneOffTaskMode);
         if (inOneOff) {
           enabled = !!ui.otherTaskTitle.trim();
         } else {
@@ -1417,7 +1492,7 @@
       } else if (which === 'note') {
         enabled = !!ui.noteMessage.trim();
       } else if (which === 'report') {
-        const inOneOff = ui.activeReportCat === 'Other' || (ui.activeReportCat && ui.oneOffReportMode);
+        const inOneOff = ui.defaultOneOffReport || (ui.activeReportCat && ui.oneOffReportMode);
         if (inOneOff) {
           enabled = !!ui.otherReportTitle.trim();
         } else {
@@ -1437,6 +1512,7 @@
     function openSheet(which) {
       document.getElementById('sheet-overlay').classList.add('open');
       document.getElementById('sheet').classList.add('open');
+      document.querySelector('.tabbar-wrap').classList.add('sheet-open');
       switchTab(which || 'task');
     }
 
@@ -1447,6 +1523,8 @@
       ui.activeReportCat = null;
       ui.oneOffTaskMode = false;
       ui.oneOffReportMode = false;
+      ui.defaultOneOffTask = false;
+      ui.defaultOneOffReport = false;
       ui.editingNoteId = null;
       ui.searchQuery = '';
       ui.reportSearchQuery = '';
@@ -1462,17 +1540,16 @@
       ui.otherTaskDetails = '';
       ui.otherReportTitle = '';
       ui.otherReportDetails = '';
-      ui.noteTitle = '';
       ui.noteMessage = '';
       const ts = document.getElementById('task-search'); if (ts) ts.value = '';
       const rs = document.getElementById('report-search'); if (rs) rs.value = '';
-      const nt = document.getElementById('note-title'); if (nt) nt.value = '';
       const nm = document.getElementById('note-message'); if (nm) nm.value = '';
     }
 
     function closeSheet() {
       document.getElementById('sheet').classList.remove('open');
       document.getElementById('sheet-overlay').classList.remove('open');
+      document.querySelector('.tabbar-wrap').classList.remove('sheet-open');
       resetSheetState();
       updateSubmit();
     }
@@ -1503,12 +1580,12 @@
       const which = panel ? panel.dataset.sheetPanel : null;
 
       if (which === 'task') {
-        const inOneOff = ui.activeCat === 'Other' || (ui.activeCat && ui.oneOffTaskMode);
+        const inOneOff = ui.defaultOneOffTask || (ui.activeCat && ui.oneOffTaskMode);
         if (inOneOff) {
           state.currentHandover.tasks.push({
             id: nextId(state.currentHandover.tasks),
             title: ui.otherTaskTitle.trim(),
-            category: ui.activeCat === 'Other' ? 'Other' : ui.activeCat,
+            category: ui.activeCat || null,
             completed: false,
             description: ui.otherTaskDetails.trim()
           });
@@ -1528,10 +1605,9 @@
         renderTasks();
       } else if (which === 'note') {
         const text = ui.noteMessage.trim();
-        const title = ui.noteTitle.trim();
         if (ui.editingNoteId) {
           const note = state.currentHandover.notes.find(n => n.id === ui.editingNoteId);
-          if (note) { note.text = text; note.title = title; }
+          if (note) { note.text = text; }
         } else if (text) {
           state.currentHandover.notes.push({
             id: nextId(state.currentHandover.notes),
@@ -1543,11 +1619,11 @@
         }
         renderNotes();
       } else if (which === 'report') {
-        const inOneOff = ui.activeReportCat === 'Other' || (ui.activeReportCat && ui.oneOffReportMode);
+        const inOneOff = ui.defaultOneOffReport || (ui.activeReportCat && ui.oneOffReportMode);
         if (inOneOff) {
           state.currentHandover.reports.push({
             id: nextId(state.currentHandover.reports),
-            category: ui.activeReportCat === 'Other' ? 'Other' : ui.activeReportCat,
+            category: ui.activeReportCat || null,
             title: ui.otherReportTitle.trim(),
             description: ui.otherReportDetails.trim()
           });
@@ -1647,18 +1723,27 @@
       if (noResultsOneoff) {
         const kind = noResultsOneoff.dataset.noResultsOneoff;
         if (kind === 'task') {
-          ui.activeCat = 'Other';
+          ui.defaultOneOffTask = true;
           ui.searchQuery = '';
           ui.searchFocused = false;
           const ts = document.getElementById('task-search'); if (ts) ts.value = '';
           renderTaskSheet();
         } else {
-          ui.activeReportCat = 'Other';
+          ui.defaultOneOffReport = true;
           ui.reportSearchQuery = '';
           ui.reportSearchFocused = false;
           const rs = document.getElementById('report-search'); if (rs) rs.value = '';
           renderReportSheet();
         }
+        return;
+      }
+
+      // default one-off button (chips area)
+      const defaultOneoff = e.target.closest('[data-default-oneoff]');
+      if (defaultOneoff) {
+        const kind = defaultOneoff.dataset.defaultOneoff;
+        if (kind === 'task') { ui.defaultOneOffTask = true; renderTaskSheet(); }
+        else { ui.defaultOneOffReport = true; renderReportSheet(); }
         return;
       }
 
@@ -1710,12 +1795,9 @@
         const note = state.currentHandover.notes.find(n => n.id === id);
         if (!note) return;
         ui.editingNoteId = id;
-        ui.noteTitle = note.title || '';
         ui.noteMessage = note.text || '';
         openSheet('note');
-        const nt = document.getElementById('note-title');
         const nm = document.getElementById('note-message');
-        if (nt) nt.value = ui.noteTitle;
         if (nm) nm.value = ui.noteMessage;
         updateSubmit();
         return;
@@ -1794,7 +1876,6 @@
       if (e.target.id === 'other-report-title') { ui.otherReportTitle = e.target.value; updateSubmit(); return; }
       if (e.target.id === 'other-report-details') { ui.otherReportDetails = e.target.value; return; }
       // note fields
-      if (e.target.id === 'note-title') { ui.noteTitle = e.target.value; return; }
       if (e.target.id === 'note-message') { ui.noteMessage = e.target.value; updateSubmit(); return; }
     });
 
@@ -1865,7 +1946,12 @@
       document.addEventListener('touchmove', e => move(e.touches[0].clientY), { passive: true });
       document.addEventListener('touchend', end);
     }
-    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSheet(); });
+    document.addEventListener('keydown', e => {
+      if (e.key !== 'Escape') return;
+      const confirm = document.getElementById('confirm-screen');
+      if (confirm && confirm.classList.contains('open')) { closeConfirmScreen(); return; }
+      closeSheet();
+    });
 
     /* ===== SWIPE TO DELETE ===== */
     (function () {
@@ -2021,12 +2107,13 @@
       const tasks = state.currentHandover.tasks.filter(t => !t.completed).length;
       const notes = state.currentHandover.notes.length;
       const reports = state.currentHandover.reports.length;
+      const fmt = (n, word) => `${n} ${word}${n !== 1 ? 's' : ''}`;
       const tEl = document.getElementById('confirm-tasks-count');
       const nEl = document.getElementById('confirm-notes-count');
       const rEl = document.getElementById('confirm-reports-count');
-      if (tEl) tEl.textContent = tasks;
-      if (nEl) nEl.textContent = notes;
-      if (rEl) rEl.textContent = reports;
+      if (tEl) tEl.textContent = fmt(tasks, 'task');
+      if (nEl) nEl.textContent = fmt(notes, 'note');
+      if (rEl) rEl.textContent = fmt(reports, 'report');
     }
 
     function openConfirmScreen() {
@@ -2057,7 +2144,6 @@
 
     document.addEventListener('click', e => {
       if (e.target.closest('.btn-finish')) { openConfirmScreen(); return; }
-      if (e.target.closest('#confirm-back')) { closeConfirmScreen(); return; }
       const add = e.target.closest('[data-confirm-add]');
       if (add) {
         const kind = add.dataset.confirmAdd;
