@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="./tokens.css?v=6" />
+  <link rel="stylesheet" href="./tokens.css?v=16" />
   <style>
     *, *::before, *::after { box-sizing: border-box; }
     html, body { margin: 0; padding: 0; }
@@ -28,15 +28,17 @@
     .device {
       width: var(--device-width);
       height: 100vh;
+      height: 100dvh; /* dvh adjusts with mobile browser chrome — fixes tabbar pushed off-screen */
       background: var(--app-background-gradient);
       position: relative;
-      overflow: hidden;
+      /* overflow: hidden is NOT set here — it breaks backdrop-filter on iOS Safari on mobile.
+         It is scoped to ≥430px below, where it is needed to clip content to the phone border-radius. */
       display: flex;
       flex-direction: column;
     }
     @media (min-width: 430px) {
       body { padding: 24px 0; align-items: flex-start; }
-      .device { height: var(--device-height); border-radius: var(--device-radius); box-shadow: var(--shadow-float); }
+      .device { height: var(--device-height); border-radius: var(--device-radius); box-shadow: var(--shadow-float); overflow: hidden; }
     }
 
     /* sticky header — transparent so the device gradient shows through */
@@ -49,7 +51,8 @@
       padding: 0 24px; color: var(--color-text-primary);
       font: var(--font-weight-semibold) var(--font-size-sm)/1 var(--font);
     }
-    .statusbar .sb-icons { display: flex; gap: 6px; align-items: center; font-size: var(--font-size-12); }
+    .statusbar .sb-icons { display: flex; gap: 7px; align-items: center; }
+    .statusbar .sb-icons svg { display: block; }
 
     /* scrollable area — transparent so the device gradient shows through */
     .scroll {
@@ -82,8 +85,8 @@
     .btn-finish {
       color: var(--finish-button-text);
       background: var(--finish-button-bg);
-      border: 1px solid var(--finish-button-border);
-      border-radius: 14px; padding: 6px 18px;
+      border: none;
+      border-radius: var(--radius-pill); padding: 6px 17px;
       font: var(--t-body);
       box-shadow: var(--finish-button-shadow);
       transition: transform var(--ease), background var(--ease);
@@ -255,7 +258,7 @@
     /* floating frosted pill tab bar */
     .tabbar-wrap {
       position: absolute; left: 0; right: 0; bottom: 0;
-      padding: 0 16px 20px; z-index: 20; pointer-events: none;
+      padding: 0 16px max(20px, env(safe-area-inset-bottom)); z-index: 20; pointer-events: none;
       transition: opacity var(--ease);
     }
     .tabbar-wrap.sheet-open { opacity: 0; pointer-events: none; }
@@ -447,6 +450,19 @@
       overflow: hidden;
     }
     .confirm-screen.open { transform: translateY(0); }
+    .confirm-back-btn {
+      position: absolute; top: 14px; left: 16px; z-index: 1;
+      width: 40px; height: 40px; border-radius: var(--radius-md);
+      background: var(--color-surface-glass-raised);
+      -webkit-backdrop-filter: blur(var(--blur-sm));
+      backdrop-filter: blur(var(--blur-sm));
+      border: 1px solid var(--color-border-subtle);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--confirm-title);
+      transition: background var(--ease), transform var(--ease);
+      cursor: pointer;
+    }
+    .confirm-back-btn:active { transform: scale(0.93); }
     .confirm-content {
       flex: 1;
       padding: 60px 24px 16px;
@@ -463,27 +479,36 @@
     /* hero illustration — avatar + ambient decorations */
     .confirm-hero {
       position: relative;
-      align-self: center;
-      width: 220px; height: 200px;
+      width: 100%; height: 250px;
       margin: 6px 0 4px;
-      display: grid; place-items: center;
     }
     .confirm-avatar {
-      width: 188px; height: 188px;
+      position: absolute;
+      left: 50%; top: 138.65px;
+      width: 222.69px; height: 222.69px;
+      transform: translate(-50%, -50%);
       object-fit: contain;
       display: block;
     }
+    /* scattered category icons — float around the avatar at Figma's true 1:1
+       scale (node 502-8). Anchored to the avatar centre: left 50% = content
+       centre, top 138.65px = avatar centre-line. Each transform moves the icon
+       to its exact Figma offset from that centre, then applies its rotation. */
     .confirm-deco {
       position: absolute;
-      font-size: 20px; line-height: 1;
-      opacity: 0.85;
+      left: 50%; top: 138.65px;
+      display: block;
+      opacity: 0.5;
       pointer-events: none;
       user-select: none;
     }
-    .confirm-deco.d1 { top: 8px;   left: 14px;  font-size: 18px; transform: rotate(-12deg); }
-    .confirm-deco.d2 { top: 2px;   right: 22px; font-size: 22px; transform: rotate(10deg); }
-    .confirm-deco.d3 { top: 70px;  right: 4px;  font-size: 16px; opacity: 0.7; }
-    .confirm-deco.d4 { bottom: 24px; left: 2px; font-size: 17px; transform: rotate(-8deg); opacity: 0.75; }
+    .confirm-deco.i-clean     { width: 17.9px; height: 17.9px; transform: translate(-50%, -50%) translate(-11px, -120.9px)   rotate(6.26deg); }
+    .confirm-deco.i-stock-a   { width: 26.3px; height: 26.3px; transform: translate(-50%, -50%) translate(-81.9px, -50.6px)  rotate(-19.79deg); }
+    .confirm-deco.i-prep-a    { width: 22px;   height: 22px;   transform: translate(-50%, -50%) translate(79.3px, -27.6px)    rotate(-37.48deg); }
+    .confirm-deco.i-prep-b    { width: 34.3px; height: 34.3px; transform: translate(-50%, -50%) translate(-118.2px, 4.9px)    rotate(28.21deg); }
+    .confirm-deco.i-stock-b   { width: 27.9px; height: 27.9px; transform: translate(-50%, -50%) translate(150.3px, -1.3px)    rotate(15.1deg); }
+    .confirm-deco.i-admin     { width: 21.7px; height: 21.7px; transform: translate(-50%, -50%) translate(-117.9px, -100px)   rotate(15.1deg); }
+    .confirm-deco.i-equipment { width: 20.6px; height: 20.6px; transform: translate(-50%, -50%) translate(104.6px, -112.3px)  rotate(29.52deg); }
     .confirm-body {
       font: var(--font-weight-regular) var(--font-size-lg)/1.5 var(--font);
       color: var(--confirm-body);
@@ -516,6 +541,7 @@
       border-radius: var(--radius-sm);
       font-size: 18px; line-height: 1;
     }
+    .summary-tile .cat-icon { width: 24px; height: 24px; object-fit: contain; display: block; }
     .summary-count {
       flex: 1;
       font: var(--font-weight-semibold) var(--font-size-md)/1.2 var(--font);
@@ -635,27 +661,6 @@
     }
     .menu-drawer.open { transform: translateX(0); }
 
-    .menu-header {
-      display: flex; align-items: center; gap: 12px;
-      padding: 24px 16px 16px;
-      border-bottom: 1px solid var(--menu-border);
-    }
-    .menu-avatar {
-      width: 40px; height: 40px; border-radius: var(--radius-full); flex-shrink: 0;
-      background: var(--menu-avatar-bg); color: var(--menu-avatar-text);
-      display: grid; place-items: center; font: var(--font-weight-semibold) var(--font-size-sm)/1 var(--font);
-    }
-    .menu-user-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
-    .menu-user-name { font: var(--font-weight-semibold) var(--font-size-15)/1.2 var(--font); color: var(--color-text-primary); }
-    .menu-user-role { font: var(--font-weight-regular) var(--font-size-12)/1.2 var(--font); color: var(--color-text-secondary); }
-    .menu-close {
-      flex-shrink: 0; display: grid; place-items: center;
-      width: 32px; height: 32px; border-radius: var(--radius-sm);
-      color: var(--color-text-secondary); transition: background var(--ease), color var(--ease);
-    }
-    .menu-close:hover { background: var(--color-surface-raised); color: var(--color-text-primary); }
-    .menu-close svg { width: 18px; height: 18px; }
-
     .menu-body { flex: 1; padding: 20px 16px; overflow-y: auto; }
     .menu-section-title {
       font: var(--font-weight-semibold) var(--font-size-xs)/1.2 var(--font); color: var(--color-text-tertiary);
@@ -698,8 +703,24 @@
   <div class="device" id="device">
     <div class="top">
       <div class="statusbar">
-        <span>9:41</span>
-        <span class="sb-icons">●●● ⌃ ▮</span>
+        <span class="sb-time">9:41</span>
+        <span class="sb-icons">
+          <svg class="sb-cellular" width="18" height="12" viewBox="0 0 18 12" fill="currentColor" aria-hidden="true" focusable="false">
+            <rect x="0"  y="8.5" width="3" height="3.5" rx="0.8"/>
+            <rect x="5"  y="5.5" width="3" height="6.5" rx="0.8"/>
+            <rect x="10" y="2.5" width="3" height="9.5" rx="0.8"/>
+            <rect x="15" y="0"   width="3" height="12"  rx="0.8"/>
+          </svg>
+          <svg class="sb-wifi" width="17" height="12" viewBox="0 0 16 12" fill="currentColor" aria-hidden="true" focusable="false">
+            <path d="M8 2.3c2.55 0 4.88 1 6.6 2.62a.42.42 0 0 1 .02.6l-1.06 1.07a.4.4 0 0 1-.57.01A7.2 7.2 0 0 0 8 4.6a7.2 7.2 0 0 0-4.99 2A.4.4 0 0 1 2.44 6.6L1.38 5.52a.42.42 0 0 1 .02-.6A9.56 9.56 0 0 1 8 2.3Z"/>
+            <path d="M8 6.35c1.27 0 2.43.5 3.29 1.32a.4.4 0 0 1 .01.57l-3 3.03a.4.4 0 0 1-.58 0l-3-3.03a.4.4 0 0 1 .01-.57A4.76 4.76 0 0 1 8 6.35Z"/>
+          </svg>
+          <svg class="sb-battery" width="25" height="12" viewBox="0 0 25 12" fill="none" aria-hidden="true" focusable="false">
+            <rect x="0.7" y="0.7" width="21" height="10.6" rx="2.7" stroke="currentColor" stroke-opacity="0.4" stroke-width="1"/>
+            <rect x="2" y="2" width="16.5" height="8" rx="1.4" fill="currentColor"/>
+            <path d="M23.3 4.2v3.6c.79-.33 1.3-1.06 1.3-1.8s-.51-1.47-1.3-1.8Z" fill="currentColor" fill-opacity="0.4"/>
+          </svg>
+        </span>
       </div>
       <header class="header">
         <div class="header-left">
@@ -832,53 +853,49 @@
 
     <!-- Finish handover — confirmation screen -->
     <div class="confirm-screen" id="confirm-screen" aria-hidden="true">
+      <button class="confirm-back-btn" id="confirm-back" aria-label="Back">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
       <div class="confirm-content">
-        <h1 class="confirm-title">Ready to hand over?</h1>
+        <h1 class="confirm-title">That's your shift done</h1>
         <div class="confirm-hero">
-          <span class="confirm-deco d1" aria-hidden="true">🍃</span>
-          <span class="confirm-deco d2" aria-hidden="true">✨</span>
-          <span class="confirm-deco d3" aria-hidden="true">☕</span>
-          <span class="confirm-deco d4" aria-hidden="true">🥐</span>
+          <img class="confirm-deco i-admin"     src="icons/admin.svg"     alt="" aria-hidden="true">
+          <img class="confirm-deco i-clean"     src="icons/clean.svg"     alt="" aria-hidden="true">
+          <img class="confirm-deco i-equipment" src="icons/equipment.svg" alt="" aria-hidden="true">
+          <img class="confirm-deco i-stock-a"   src="icons/stock.svg"     alt="" aria-hidden="true">
+          <img class="confirm-deco i-prep-a"    src="icons/prep.svg"      alt="" aria-hidden="true">
+          <img class="confirm-deco i-prep-b"    src="icons/prep.svg"      alt="" aria-hidden="true">
+          <img class="confirm-deco i-stock-b"   src="icons/stock.svg"     alt="" aria-hidden="true">
           <img class="confirm-avatar" src="icons/avatar_coffee.svg" alt="Barista taking a coffee break">
         </div>
-        <p class="confirm-body">If you are sure you did not forget anything, go on and enjoy the rest of your day 😀</p>
+        <p class="confirm-body">Take a quick look. Everything there? Go enjoy your day.</p>
         <div class="confirm-section">
           <h2>Your handover</h2>
           <div class="summary-card">
-            <span class="summary-tile" aria-hidden="true">📦</span>
+            <span class="summary-tile" aria-hidden="true"><img class="cat-icon" src="icons/tasks.svg" alt=""></span>
             <span class="summary-count" id="confirm-tasks-count">0 tasks</span>
             <button class="summary-add" data-confirm-add="task"><i data-lucide="plus"></i>Add</button>
           </div>
           <div class="summary-card">
-            <span class="summary-tile" aria-hidden="true">📕</span>
+            <span class="summary-tile" aria-hidden="true"><img class="cat-icon" src="icons/notes.svg" alt=""></span>
             <span class="summary-count" id="confirm-notes-count">0 notes</span>
             <button class="summary-add" data-confirm-add="note"><i data-lucide="plus"></i>Add</button>
           </div>
           <div class="summary-card">
-            <span class="summary-tile" aria-hidden="true">👥</span>
+            <span class="summary-tile" aria-hidden="true"><img class="cat-icon" src="icons/reports.svg" alt=""></span>
             <span class="summary-count" id="confirm-reports-count">0 reports</span>
             <button class="summary-add" data-confirm-add="report"><i data-lucide="plus"></i>Add</button>
           </div>
         </div>
       </div>
       <div class="confirm-footer">
-        <button class="btn-finish-shift" id="confirm-finish">Finish shift</button>
+        <button class="btn-finish-shift" id="confirm-finish">Hand over</button>
       </div>
     </div>
 
     <!-- Menu overlay + drawer -->
     <div class="menu-overlay" id="menu-overlay" aria-hidden="true"></div>
     <div class="menu-drawer" id="menu-drawer" role="dialog" aria-modal="true" aria-label="Menu" aria-hidden="true">
-      <div class="menu-header">
-        <div class="menu-avatar" id="menu-avatar">MK</div>
-        <div class="menu-user-info">
-          <span class="menu-user-name" id="menu-user-name">Maria Kowalski</span>
-          <span class="menu-user-role">Morning shift · Barista</span>
-        </div>
-        <button class="menu-close" id="menu-close" aria-label="Close menu">
-          <i data-lucide="x"></i>
-        </button>
-      </div>
       <div class="menu-body">
         <p class="menu-section-title">Appearance</p>
         <div class="theme-row">
@@ -2151,6 +2168,7 @@
         setTimeout(() => openSheet(kind), 200);
         return;
       }
+      if (e.target.closest('#confirm-back'))   { closeConfirmScreen(); return; }
       if (e.target.closest('#confirm-finish')) { showDoneScreen(); return; }
 
       if (e.target.closest('#btn-new-handover')) {

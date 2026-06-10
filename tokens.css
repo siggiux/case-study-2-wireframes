@@ -221,8 +221,8 @@
   --color-on-accent-scrim:    rgba(255, 255, 255, 0.22); /* translucent fill on accent surfaces */
 
   /* --- Component surfaces (theme-aware; warm in light → cool in dark) --- */
-  --color-finish-surface:       var(--warm-40);                /* Done-button fill */
-  --color-finish-surface-hover: var(--warm-75);
+  --color-finish-surface:       rgba(77, 91, 227, 0.05);        /* Done-button fill — 5% accent tint */
+  --color-finish-surface-hover: rgba(77, 91, 227, 0.10);
   --color-tabbar-surface:       rgba(250, 251, 254, 0.45);     /* floating tab bar glass */
   --color-summary-add-surface:  var(--color-surface-glass-active); /* confirm "add another" */
 }
@@ -243,21 +243,21 @@
   --color-surface-raised-hover:    var(--teal-700);
   --color-surface-inverse:         var(--teal-700);   /* #4A7578 — checkbox fill */
 
-  /* --- Background gradient (teal wash: #124649 → #165655 → #427F7D) --- */
+  /* --- Background gradient (deep teal wash: #124649 → #165655, stays dark to match Figma) --- */
   --color-background-gradient-1: var(--teal-900);
   --color-background-gradient-2: var(--teal-900);
   --color-background-gradient-3: var(--teal-800);
-  --color-background-gradient-4: var(--teal-600);
+  --color-background-gradient-4: var(--teal-800);
 
-  /* --- Confirm gradient (same teal wash) --- */
+  /* --- Confirm gradient (same deep teal wash) --- */
   --color-confirm-gradient-top: var(--teal-900);
   --color-confirm-gradient-mid: var(--teal-800);
-  --color-confirm-gradient-end: var(--teal-600);
+  --color-confirm-gradient-end: var(--teal-800);
 
   /* --- Glass surfaces (light film over teal) --- */
-  --color-surface-glass:             rgba(250, 251, 254, 0.10);  /* card default bg  */
-  --color-surface-glass-raised:      rgba(250, 251, 254, 0.18);  /* raised glass card */
-  --color-surface-glass-active:      rgba(250, 251, 254, 0.20);  /* card clicked bg  */
+  --color-surface-glass:             rgba(250, 251, 254, 0.10);  /* card default bg → ~#29585B over teal-900 */
+  --color-surface-glass-raised:      rgba(250, 251, 254, 0.12);  /* raised glass card → ~#2C6463 (Figma note card) */
+  --color-surface-glass-active:      rgba(250, 251, 254, 0.14);  /* card clicked bg  */
   --color-surface-icon-tile:         rgba(255, 255, 255, 0.08);
   --color-surface-icon-tile-active:  rgba(255, 255, 255, 0.14);
 
@@ -334,9 +334,9 @@
   /* --- Done button --- */
   --finish-button-bg:        var(--color-finish-surface);
   --finish-button-bg-hover:  var(--color-finish-surface-hover);
-  --finish-button-text:      var(--color-text-secondary);
+  --finish-button-text:      var(--color-text-primary);
   --finish-button-border:    var(--color-border-subtle);
-  --finish-button-shadow:    0 1px 2px rgba(0, 0, 0, 0.10);
+  --finish-button-shadow:    0 1px 2px rgba(0, 0, 0, 0.05);
 
   /* --- Section header --- */
   --section-title-color:     var(--color-text-primary);
@@ -384,10 +384,10 @@
   --report-icon-warn:        var(--color-warning);
   --report-icon-stock:       var(--color-accent);
 
-  /* --- Add button --- */
-  --add-button-border:       var(--color-border-accent);
-  --add-button-text:         var(--color-accent);
-  --add-button-bg-hover:     var(--color-accent-soft);
+  /* --- Add button (muted neutral per design: border neutral-400, text neutral-300) --- */
+  --add-button-border:       var(--color-text-tertiary);
+  --add-button-text:         var(--color-text-secondary);
+  --add-button-bg-hover:     var(--color-surface-glass);
 
   /* --- Normalising copy --- */
   --normalising-text-color:  var(--color-text-tertiary);
@@ -479,9 +479,9 @@
   --summary-tile-bg:         var(--color-surface-icon-tile);
   --summary-count:           var(--color-text-primary);
   --summary-label:           var(--color-text-primary);
-  --summary-add-bg:          var(--color-summary-add-surface);
+  --summary-add-bg:          transparent;
   --summary-add-text:        var(--color-text-primary);
-  --summary-add-shadow:      var(--shadow-card);
+  --summary-add-shadow:      none;
   --summary-finish-bg:       var(--color-accent);
   --summary-finish-text:     var(--color-text-on-accent);
 
@@ -499,4 +499,22 @@
   --seg-active-text:         var(--color-text-primary);
   --seg-inactive-text:       var(--color-text-secondary);
   --seg-active-shadow:       var(--shadow-seg);
+}
+
+
+/* ============================================
+   4. DARK-MODE COMPONENT OVERRIDES
+   A few component tokens need a different value
+   in dark mode than the accent-based default.
+   Uses :root[data-theme="dark"] (higher specificity
+   than :root) so it wins over the component layer
+   above regardless of source order. Light mode is
+   unaffected — these never apply without the attr.
+   ============================================ */
+:root[data-theme="dark"] {
+  /* Tab bar: active = light-gray neutral (not blue); inactive dimmed so active stays distinct */
+  --tab-icon-active:    var(--color-text-primary);
+  --tab-label-active:   var(--color-text-primary);
+  --tab-icon-inactive:  var(--color-text-secondary);
+  --tab-label-inactive: var(--color-text-secondary);
 }

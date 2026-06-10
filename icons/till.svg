@@ -1,7 +1,64 @@
-<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M15 6.66669H15.8333C16.7174 6.66669 17.5652 7.01788 18.1904 7.643C18.8155 8.26812 19.1667 9.11597 19.1667 10C19.1667 10.8841 18.8155 11.7319 18.1904 12.357C17.5652 12.9822 16.7174 13.3334 15.8333 13.3334H15" stroke="#4D5BE3" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-<path d="M1.66675 6.66669H15.0001V14.1667C15.0001 15.0507 14.6489 15.8986 14.0238 16.5237C13.3986 17.1488 12.5508 17.5 11.6667 17.5H5.00008C4.11603 17.5 3.26818 17.1488 2.64306 16.5237C2.01794 15.8986 1.66675 15.0507 1.66675 14.1667V6.66669Z" stroke="#4D5BE3" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-<path d="M5 0.833313V3.33331" stroke="#4D5BE3" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-<path d="M8.33325 0.833313V3.33331" stroke="#4D5BE3" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-<path d="M11.6667 0.833313V3.33331" stroke="#4D5BE3" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 119.7 123.5">
+<!-- SVG created with Arrow, by QuiverAI (https://quiver.ai) -->
+  <style type="text/css">.cls-0 {fill:url(#SVGID_1_);}
+.cls-1 {fill:#D6E0E2;}
+.cls-2 {fill:#B4C3CA;}
+.cls-3 {fill:#F2F5F8;}
+.cls-4 {fill:#9AADB3;}
+.cls-5 {fill:#AEBCC2;}
+.cls-6 {fill:#ECEDF0;}
+.cls-7 {fill:#EFF1DC;}
+.cls-8 {fill:#BBBAB0;}
+.cls-9 {fill:#F3EFDD;}
+.cls-10 {fill:#AABAC0;}
+.cls-11 {fill:#132835;}
+.cls-12 {fill:#192C3A;}
+.cls-13 {fill:#0E2337;}
+.cls-14 {fill:#13385B;}
+.cls-15 {fill:#EFF4F7;}
+.cls-16 {fill:#CFDADE;}</style>
+  <linearGradient id="SVGID_1_" x1="48.9" x2="71.19" y1="78.83" y2="120.3" gradientUnits="userSpaceOnUse">
+    <stop stop-color="#DFDBDB" offset="0"/>
+    <stop stop-color="#fff" stop-opacity="0" offset="1"/>
+  </linearGradient>
+  <polygon class="cls-0" points="0 85.9 64.5 121.5 115.4 92.7 54.2 61"/>
+  <polygon class="cls-1" points="31.4 34.9 37.4 11.6 42.2 9.1 56.7 28.6 54.5 48.1"/>
+  <polygon class="cls-2" points="115.5 92.7 115.5 37.4 97.9 28.3 95.8 69.6 64.5 101.4 64.5 121.5"/>
+  <polygon class="cls-3" points="63 13.3 37.4 11.6 42.3 9.1 75.7 9.1 115.5 37.4 102.5 45.3"/>
+  <polyline class="cls-1" points="102.5 45.3 95.8 69.6 31.3 34.9 37.4 11.6 40.6 13.1"/>
+  <path class="cls-6" d="m36.9 34.3 18.7 10 0.9-1.1-18.2-10.5z"/>
+  <path class="cls-4" d="m38.3 33.5 18.5 9.4 0.5-1.4-19-9.2z" fill="#a3b1b5"/>
+  <polygon class="cls-5" transform="" points="65.1 35.5 62 47.8 89.6 62.5 92.9 50.4"/>
+  <polygon class="cls-4" transform="" points="63.2 47.5 61.9 47.8 65 35.5 66 36"/>
+  <polygon class="cls-3" points="102.3 45.3 60.4 23.4 56.1 44.3 55.6 44.3 37.1 34.5 37.1 34.3 37 34.3 37.1 34.3 37.5 33.6 31.4 34.8 0 66.1 64.5 101.4 95.9 69.6 95.9 69.5 95.9 69.5" style=""/>
+  <path class="cls-7" d="m65.4 12.3s-9.3-4.4-15.4-8c-4.2-2.5-10 5.4-10.1 11.2v19.1l14.9 7.9v-19.4c0.2-2.4 1.6-5.4 1.6-5.4l9-5.4z" fill="#eff1de"/>
+  <path class="cls-8" d="m56.8 16.8 12.7 6.9c-2.2-0.6-2.1-3.9-2-5.6 0.1-4-2.1-6.3-3.8-6.3-2.5-0.2-5.3 1.7-6.9 5z" fill="#bbb9a9"/>
+  <path class="cls-9" d="m67.5 16.4c0.3 2.5-0.9 6.9 2 7.4 2.8 0.4 5.6-3.5 5.6-3.5l-7.6-3.9z" fill="#f3efdd"/>
+  <path class="cls-5" d="m55.3 20.8 5.1 2.7-0.1 0.1c-0.9 1.2-1.5 4.2-2 6.2l-2.7 11.5-0.8 1.1v-19.1c0-1 0.5-2.5 0.5-2.5z" fill="#a7b4ba"/>
+  <path class="cls-7" d="m55.9 18 1-1.2 10.4-0.8 0.9 3-3.5 2.2-8.1-4.3z" fill="#eff1de"/>
+  <polygon class="cls-1" points="71.4 17.6 83.2 23.8 83.2 31.8 91.8 36 99 32.1 103.8 34.1 103.8 18.3 71.4 1.8" fill="#d6e0e2"/>
+  <polygon class="cls-10" points="91.8 28.2 99.4 32 91.8 36" fill="#aabac0"/>
+  <polygon class="cls-6" points="71.4 1.9 75.8 0 91.9 0 115.5 11.8 103.8 18.3" fill="#ecf0f3"/>
+  <polygon class="cls-2" points="103.8 18.3 103.8 34.1 115.5 27.8 115.5 11.8" fill="#adc"/>
+  <polygon class="cls-16" points="0 66.1 0 86 64.5 121.4 64.5 101.4" fill="#cfdadf"/>
+  <path class="cls-13" d="m29.6 89.7 1.7-0.8c0.8-0.4 1.7-0.3 2.7 0.4 1.9 1.2 3.4 4.1 3.1 6.9-0.1 0.8-0.6 1.7-1.3 2.1l-1.8 0.7-4.4-9.3z" fill="#0e2337"/>
+  <path class="cls-12" d="m28.3 92.5c0 2.6 1.8 5.4 3.7 6.5s3.6 0.1 3.6-2.4-1.8-5.4-3.6-6.6c-2-1.2-3.7-0.1-3.7 2.5z" fill="#192c3a"/>
+  <polygon class="cls-13" points="63.7 57.4 63.7 59 61 61.2 54.9 58 54.9 56.3 57.6 54.1" fill="#0e2337"/>
+  <polygon class="cls-14" points="63.5 57.4 60.9 59.6 54.9 56.3 57.6 54.1" fill="#13385b"/>
+  <polygon class="cls-13" points="74.3 62.8 74.3 64.4 71.6 66.7 65.3 63.5 65.3 61.9 68.1 59.6" fill="#0e2337"/>
+  <polygon class="cls-14" points="74.2 62.8 71.5 64.9 65.3 61.9 68.1 59.6" fill="#13385b"/>
+  <polygon class="cls-13" points="85.5 68.6 85.5 70.2 82.8 72.5 76.6 69.3 76.6 67.6 79.4 65.4" fill="#0e2337"/>
+  <polygon class="cls-14" points="85.5 68.6 82.8 70.8 76.6 67.6 79.4 65.4" fill="#13385b"/>
+  <polygon class="cls-13" points="56.5 64.7 56.5 66.3 53.9 68.6 47.7 65.3 47.7 63.7 50.5 61.5" fill="#0e2337"/>
+  <polygon class="cls-14" points="56.5 64.8 53.8 66.9 47.7 63.7 50.5 61.4" fill="#13385b"/>
+  <polygon class="cls-13" points="66.8 70.1 66.8 71.8 64.1 74 58.1 70.8 58.2 69.2 60.8 66.9" fill="#0e2337"/>
+  <polygon class="cls-14" points="66.8 70.2 64.1 72.4 58.1 69.2 60.8 66.9" fill="#13385b"/>
+  <polygon class="cls-13" points="78.1 75.8 78.1 77.4 75.5 79.7 69.2 76.5 69.2 74.9 72.1 72.7" fill="#0e2337"/>
+  <polygon class="cls-14" points="78.1 75.8 75.4 78.1 69.2 74.9 72.1 72.7" fill="#13385b"/>
+  <polygon class="cls-13" points="47.6 73.5 47.6 75.2 44.9 77.4 38.6 74.2 38.6 72.6 41.5 70.4" fill="#0e2337"/>
+  <polygon class="cls-14" points="47.6 73.6 44.8 75.8 38.6 72.6 41.5 70.4" fill="#13385b"/>
+  <polygon class="cls-13" points="57.9 78.9 57.9 80.6 55.3 83.1 49.2 79.7 49.2 78.1 52 75.9" fill="#0e2337"/>
+  <polygon class="cls-14" points="57.9 79 55.3 81.4 49.2 78.1 52 75.9" fill="#13385b"/>
+  <polygon class="cls-13" points="69 85.4 69 86.9 66.2 89.6 60.2 86.1 60.2 84.3 62.8 81.8" fill="#0e2337"/>
+  <polygon class="cls-14" points="68.9 85.4 66.2 87.8 60.2 84.3 62.8 81.8" fill="#13385b"/>
 </svg>
