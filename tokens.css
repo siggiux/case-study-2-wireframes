@@ -127,9 +127,9 @@
   --blur-md: 24px;   /* heavy frosted overlays  */
 
   /* --- Motion --- */
-  --duration-fast: 150ms;
-  --duration-base: 280ms;
-  --easing-standard:   ease;
+  --duration-fast: 200ms;
+  --duration-base: 320ms;
+  --easing-standard:   cubic-bezier(0.33, 1, 0.68, 1); /* easeOutCubic — gentle, natural deceleration */
   --easing-decelerate: cubic-bezier(0.16, 1, 0.3, 1);
 
   /* --- Type styles (composite shorthands: weight size/line-height family) ---
