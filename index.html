@@ -189,7 +189,7 @@
     }
     .row-detail-input::placeholder { color: var(--task-input-placeholder); }
     .row-detail-input:focus { border-color: var(--input-focus-border); box-shadow: 0 0 0 2px var(--input-focus-ring); }
-    .row-detail-text { flex: 1; font: var(--t-sm); color: var(--color-text-secondary); line-height: 1.5; }
+    .row-detail-text { flex: 1; font: var(--t-sm); color: var(--color-text-secondary); line-height: 1.5; cursor: text; }
 
     /* checkbox (right side of task cards) */
     .check {
@@ -1674,13 +1674,35 @@
 
       // expand row (whole-card tap — tasks, notes & reports)
       const expandable = e.target.closest('.row[data-expandable]');
-      if (expandable && !e.target.closest('.check') && !e.target.closest('.row-delete-bg') && !e.target.closest('.row-detail-input') && !e.target.closest('.edit[data-note-id]')) {
+      if (expandable && !e.target.closest('.check') && !e.target.closest('.row-delete-bg') && !e.target.closest('.row-detail-input') && !e.target.closest('.row-detail-text') && !e.target.closest('.edit[data-note-id]')) {
         document.querySelectorAll('.row[data-expandable].open').forEach(r => { if (r !== expandable) r.classList.remove('open'); });
         expandable.classList.toggle('open');
         if (expandable.classList.contains('open')) {
           const inp = expandable.querySelector('.row-detail-input');
           if (inp) setTimeout(() => inp.focus(), 50);
         }
+        return;
+      }
+
+      // click on read-only detail text → swap span for editable input inline
+      const detailSpan = e.target.closest('.row-detail-text');
+      if (detailSpan) {
+        const detailDiv = detailSpan.parentElement;
+        const row = detailSpan.closest('.row');
+        const wrapper = document.createElement('div');
+        wrapper.className = 'row-detail-wrapper';
+        const inp = document.createElement('input');
+        inp.type = 'text';
+        inp.className = 'row-detail-input';
+        inp.value = detailSpan.textContent;
+        inp.placeholder = 'Add details (optional)';
+        if (row.dataset.taskId)   inp.dataset.detailTaskId   = row.dataset.taskId;
+        if (row.dataset.reportId) inp.dataset.detailReportId = row.dataset.reportId;
+        wrapper.appendChild(inp);
+        detailDiv.innerHTML = '';
+        detailDiv.appendChild(wrapper);
+        inp.focus();
+        inp.select();
         return;
       }
 
